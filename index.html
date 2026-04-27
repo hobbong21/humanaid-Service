@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>사람과 AI, 디지털을 잇는 기술 매거진, humanaid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F4;
+    --ink: #111111;
+    --ink-soft: #555555;
+    --ink-mute: #9A9A9A;
+    --line: #ECECEC;
+    --line-strong: #DCDCDC;
+    --terra: #B8412A;
+    --terra-deep: #8E2F1E;
+    --forest: #1F3A2E;
+    --ochre: #C98A2B;
+    --paper: #ffffff;
+    --new: #B8412A;
+    --rank: #111111;
+    --serif: 'Noto Serif KR', serif;
+    --serif-kr: 'Noto Serif KR', serif;
+    --sans: 'Noto Sans KR', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: var(--terra); color: #fff; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+  .util { background: var(--surface); color: var(--ink-soft); font-size: 12px; border-bottom: 1px solid var(--line); }
+  .util .row { display: flex; justify-content: space-between; align-items: center; height: 38px; }
+  .util a { color: var(--ink-soft); transition: color .15s; }
+  .util a:hover { color: var(--terra); }
+  .util .left { display: flex; gap: 22px; align-items: center; }
+  .util .left a { position: relative; }
+  .util .left a:first-child { font-weight: 600; color: var(--ink); font-size: 12.5px; }
+  .util .left a:first-child::after { content: ""; position: absolute; right: -12px; top: 50%; width: 1px; height: 11px; background: var(--line-strong); transform: translateY(-50%); }
+  .util .right { display: flex; gap: 22px; }
+
+  header.main { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 50; }
+  header.main .row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; height: 78px; gap: 48px; }
+  .logo { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: -0.03em; color: var(--ink); display: flex; align-items: baseline; gap: 4px; }
+  .logo .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--terra); display: inline-block; transform: translateY(-2px); margin-left: 2px; }
+  nav.primary { display: flex; gap: 30px; }
+  nav.primary a { font-size: 14.5px; font-weight: 500; color: var(--ink); padding: 6px 0; position: relative; transition: color .15s; }
+  nav.primary a:hover { color: var(--terra); }
+  nav.primary a.active { color: var(--terra); font-weight: 600; }
+  nav.primary a.active::after { content: ""; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: var(--terra); }
+  .header-right { display: flex; align-items: center; gap: 18px; }
+  .header-right .ad { font-size: 13px; color: var(--ink-soft); font-weight: 500; padding: 7px 13px; border: 1px solid var(--line-strong); border-radius: 999px; transition: all .15s; }
+  .header-right .ad:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .header-right .author, .header-right .login { font-size: 14px; color: var(--ink-soft); font-weight: 500; }
+  .header-right .signup { font-size: 14px; font-weight: 600; background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 4px; transition: background .15s; }
+  .header-right .signup:hover { background: var(--terra); }
+
+  .cats { background: var(--surface); border-bottom: 1px solid var(--line); }
+  .cats .row { display: flex; gap: 6px; overflow-x: auto; padding: 14px 0; align-items: center; }
+  .cats a { flex-shrink: 0; font-size: 13.5px; font-weight: 500; padding: 7px 14px; border-radius: 999px; color: var(--ink-soft); border: 1px solid transparent; transition: all .15s; white-space: nowrap; }
+  .cats a:hover { color: var(--ink); background: var(--surface-2); }
+  .cats a.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .cats .row::-webkit-scrollbar { display: none; }
+
+  .hero { padding: 56px 0 48px; }
+  .hero-grid { display: grid; grid-template-columns: 1.65fr 1fr; gap: 28px; }
+  .editor-pick { background: var(--surface); border: 1px solid var(--line); padding: 38px; position: relative; overflow: hidden; border-radius: 6px; }
+  .editor-pick::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--terra) 0%, var(--ochre) 50%, var(--forest) 100%); }
+  .label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--terra); font-weight: 500; margin-bottom: 18px; }
+  .label::before { content: ""; width: 18px; height: 1px; background: var(--terra); }
+  .editor-pick h2 { font-family: var(--serif-kr); font-size: 32px; line-height: 1.4; font-weight: 700; margin: 0 0 28px; letter-spacing: -0.025em; }
+  .editor-pick h2 span { color: var(--terra); }
+  .pick-author { display: flex; align-items: center; gap: 12px; padding: 16px 0 4px; border-top: 1px solid var(--line); margin-top: 28px; }
+  .pick-author .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--ochre), var(--terra)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 13px; }
+  .pick-author .meta { font-size: 13px; color: var(--ink-soft); }
+  .pick-author .meta b { color: var(--ink); font-weight: 600; display: block; font-size: 14px; }
+  .pick-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 13px; color: var(--ink); font-weight: 500; border-bottom: 1px solid var(--ink); padding-bottom: 2px; }
+  .pick-link:hover { color: var(--terra); border-color: var(--terra); }
+  .signup-card { background: var(--ink); color: #fff; padding: 38px 32px; position: relative; overflow: hidden; border-radius: 6px; }
+  .signup-card::before { content: "—"; position: absolute; top: 22px; right: 28px; font-family: var(--serif); font-size: 60px; opacity: .3; color: var(--ochre); font-weight: 300; }
+  .signup-card h3 { font-family: var(--serif-kr); font-weight: 700; font-size: 22px; line-height: 1.5; margin: 0 0 14px; letter-spacing: -0.02em; }
+  .signup-card p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.7); margin: 0 0 26px; font-weight: 300; }
+  .signup-card .btn { display: inline-block; background: var(--terra); color: #fff; padding: 11px 22px; font-size: 14px; font-weight: 600; border-radius: 4px; transition: background .15s; }
+  .signup-card .btn:hover { background: var(--ochre); color: var(--ink); }
+
+  .three-col { padding: 24px 0 64px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 36px; }
+  .col-block h4 { font-family: var(--serif-kr); font-size: 18px; font-weight: 700; margin: 0 0 18px; letter-spacing: -0.02em; padding-bottom: 14px; border-bottom: 1px solid var(--line-strong); display: flex; justify-content: space-between; align-items: baseline; }
+  .col-block h4 a { font-family: var(--sans); font-size: 12px; color: var(--ink-mute); font-weight: 400; }
+  .col-block h4 a:hover { color: var(--terra); }
+  .mini-list { list-style: none; padding: 0; margin: 0; }
+  .mini-list li { display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px dashed var(--line); }
+  .mini-list li:last-child { border-bottom: 0; }
+  .mini-list .num { font-family: var(--serif); font-size: 22px; color: var(--terra); font-weight: 700; flex-shrink: 0; width: 28px; line-height: 1; padding-top: 2px; }
+  .mini-list .ttl { font-size: 14px; line-height: 1.55; color: var(--ink); font-weight: 500; }
+  .mini-list .ttl:hover { color: var(--terra); }
+  .mini-list .ttl small { display: block; margin-top: 6px; font-size: 11.5px; color: var(--ink-mute); font-weight: 400; font-family: var(--mono); }
+  .quote-list li { padding: 14px 0; border-bottom: 1px dashed var(--line); }
+  .quote-list .q { font-family: var(--serif-kr); font-size: 14.5px; line-height: 1.7; color: var(--ink-soft); font-weight: 500; quotes: "“" "”"; }
+  .quote-list .q::before { content: open-quote; color: var(--terra); margin-right: 2px; }
+  .quote-list .q::after { content: close-quote; color: var(--terra); margin-left: 2px; }
+  .quote-list .src { font-size: 11.5px; color: var(--ink-mute); margin-top: 6px; font-family: var(--mono); }
+  .author-list li { padding: 12px 0; align-items: center; gap: 14px; }
+  .author-list .av { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--forest), var(--terra)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 13px; }
+  .author-list .av.b { background: linear-gradient(135deg, var(--ochre), var(--terra-deep)); }
+  .author-list .av.c { background: linear-gradient(135deg, var(--terra), var(--forest)); }
+  .author-list .av.d { background: linear-gradient(135deg, var(--ink), var(--ochre)); }
+  .author-list .nm { font-size: 14px; font-weight: 600; }
+  .author-list .desc { font-size: 12px; color: var(--ink-mute); margin-top: 2px; line-height: 1.5; }
+
+  .playbook { background: var(--surface-2); padding: 72px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .section-h { margin-bottom: 36px; }
+  .section-h .kicker { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .16em; color: var(--terra); font-weight: 500; margin-bottom: 10px; }
+  .section-h h2 { font-family: var(--serif-kr); font-size: 32px; font-weight: 700; margin: 0; letter-spacing: -0.025em; }
+  .section-h h2 em { color: var(--terra); font-style: normal; font-weight: 700; }
+  .playbook-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .pb-card { background: var(--paper); border: 1px solid var(--line); padding: 28px 24px; transition: all .2s; min-height: 200px; display: flex; flex-direction: column; border-radius: 6px; }
+  .pb-card:hover { border-color: var(--terra); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.04); }
+  .pb-icon { font-family: var(--serif); font-size: 30px; color: var(--terra); margin-bottom: 18px; line-height: 1; font-weight: 700; }
+  .pb-card h5 { font-family: var(--serif-kr); font-size: 17px; margin: 0 0 8px; font-weight: 700; letter-spacing: -0.02em; }
+  .pb-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 auto; }
+  .pb-card .arr { margin-top: 20px; font-size: 13px; color: var(--terra); font-weight: 600; }
+
+  .nl { background: var(--ink); color: #fff; padding: 76px 0; position: relative; overflow: hidden; }
+  .nl::before { content: ""; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; border-radius: 50%; background: var(--terra); opacity: .18; filter: blur(60px); }
+  .nl::after { content: ""; position: absolute; bottom: -120px; left: -80px; width: 380px; height: 380px; border-radius: 50%; background: var(--forest); opacity: .3; filter: blur(80px); }
+  .nl-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .nl h2 { font-family: var(--serif-kr); font-size: 36px; line-height: 1.4; margin: 0 0 14px; font-weight: 700; letter-spacing: -0.025em; }
+  .nl h2 em { color: var(--ochre); font-style: normal; font-weight: 700; }
+  .nl > .wrap > .nl-grid > .left > p { font-size: 15px; color: rgba(255,255,255,.7); line-height: 1.75; font-weight: 300; margin: 0 0 24px; }
+  .nl-stats { display: flex; gap: 24px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.15); }
+  .nl-stats .stat .n { font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ochre); letter-spacing: -0.03em; }
+  .nl-stats .stat .l { font-size: 11px; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .1em; font-family: var(--mono); margin-top: 2px; }
+  .nl-form { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); padding: 32px; border-radius: 6px; }
+  .nl-form input[type=email] { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,.3); padding: 14px 0; font-size: 16px; color: #fff; font-family: var(--sans); margin-bottom: 18px; outline: none; transition: border-color .15s; }
+  .nl-form input[type=email]::placeholder { color: rgba(255,255,255,.4); }
+  .nl-form input[type=email]:focus { border-color: var(--ochre); }
+  .nl-checks { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+  .nl-checks label { font-size: 12.5px; color: rgba(255,255,255,.65); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .nl-checks label input { accent-color: var(--ochre); }
+  .nl-form button { width: 100%; background: var(--ochre); color: var(--ink); border: none; padding: 14px; font-size: 15px; font-weight: 700; font-family: var(--sans); cursor: pointer; border-radius: 4px; transition: background .15s; }
+  .nl-form button:hover { background: #E0A03B; }
+
+  .top-week { padding: 76px 0 32px; background: var(--bg); }
+  .tw-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 36px; }
+  .tw-head h2 { font-family: var(--serif-kr); font-size: 30px; font-weight: 700; margin: 0; letter-spacing: -0.025em; }
+  .tw-head h2 .week { color: var(--terra); margin-right: 10px; font-weight: 700; }
+  .tw-head .meta { font-size: 12.5px; color: var(--ink-mute); font-family: var(--mono); }
+  .tw-head .meta::before { content: "▲"; color: var(--terra); margin-right: 6px; font-size: 10px; }
+  .top-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+  .top-card { cursor: pointer; display: flex; flex-direction: column; background: var(--paper); border: 1px solid var(--line); transition: all .2s; border-radius: 6px; overflow: hidden; }
+  .top-card:hover { border-color: var(--ink-soft); transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.06); }
+  .top-card .thumb { aspect-ratio: 16/10; background: var(--bg); position: relative; overflow: hidden; }
+  .top-card .thumb svg { width: 100%; height: 100%; display: block; }
+  .top-card .body { padding: 18px 20px 20px; display: flex; flex-direction: column; flex: 1; }
+  .top-card .rank-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .top-card .rank { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--rank); line-height: 1; letter-spacing: -0.04em; }
+  .top-card .new-badge { font-family: var(--mono); font-size: 10px; font-weight: 600; color: #fff; background: var(--new); padding: 3px 7px; letter-spacing: .08em; border-radius: 2px; }
+  .top-card .delta { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); display: inline-flex; align-items: center; gap: 3px; }
+  .top-card .delta.up { color: var(--forest); }
+  .top-card .delta.up::before { content: "▲"; font-size: 9px; }
+  .top-card h3 { font-family: var(--serif-kr); font-size: 16px; line-height: 1.5; margin: 0 0 14px; font-weight: 700; flex: 1; letter-spacing: -0.02em; }
+  .top-card .footer-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-mute); margin-top: auto; }
+  .top-card .cat { color: var(--terra); font-weight: 600; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .top-card .dot { color: var(--line-strong); }
+
+  .pat-1 { background: linear-gradient(135deg, #1F3A2E 0%, #B8412A 100%); }
+  .pat-2 { background: linear-gradient(160deg, #C98A2B 0%, #8E2F1E 100%); }
+  .pat-3 { background: linear-gradient(135deg, #1A1A1A 0%, #1F3A2E 100%); }
+  .pat-4 { background: linear-gradient(135deg, #B8412A 0%, #C98A2B 100%); }
+  .pat-5 { background: linear-gradient(135deg, #1F3A2E 0%, #1A1A1A 100%); }
+  .pat-6 { background: linear-gradient(135deg, #C98A2B 0%, #1F3A2E 100%); }
+  .pat-7 { background: linear-gradient(160deg, #8E2F1E 0%, #1A1A1A 100%); }
+
+  .articles { padding: 32px 0 80px; border-top: 1px solid var(--line); margin-top: 24px; background: var(--bg); }
+  .article-list { display: flex; flex-direction: column; }
+  .article-row { display: grid; grid-template-columns: 50px 1fr 240px; gap: 28px; align-items: center; padding: 28px 0; border-bottom: 1px solid var(--line); cursor: pointer; transition: background .15s; }
+  .article-row:hover { background: rgba(184,65,42,.025); }
+  .ar-rank { font-family: var(--serif); font-weight: 700; font-size: 36px; color: var(--ink); line-height: 1; letter-spacing: -0.04em; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .ar-rank .badge-new { font-family: var(--mono); font-size: 9px; font-weight: 600; color: #fff; background: var(--new); padding: 2px 5px; letter-spacing: .1em; border-radius: 2px; }
+  .ar-rank .badge-num { font-family: var(--mono); font-size: 9px; font-weight: 600; color: var(--ink-soft); letter-spacing: .1em; }
+  .ar-body { display: flex; flex-direction: column; gap: 12px; }
+  .ar-meta-top { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .ar-meta-top .cat { color: var(--terra); font-weight: 600; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .ar-meta-top .min { color: var(--ink-mute); font-family: var(--mono); }
+  .ar-meta-top .pop { color: var(--ochre); font-family: var(--mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+  .ar-body h3 { font-family: var(--serif-kr); font-size: 22px; line-height: 1.45; margin: 0; font-weight: 700; letter-spacing: -0.025em; }
+  .ar-body h3:hover { color: var(--terra); }
+  .ar-body p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.65; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .ar-body .author-line { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .ar-body .author-line .av { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--ochre), var(--terra)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 9px; }
+  .ar-body .author-line .av.b { background: linear-gradient(135deg, var(--forest), var(--ink)); }
+  .ar-body .author-line .av.c { background: linear-gradient(135deg, var(--terra-deep), var(--ochre)); }
+  .ar-body .author-line .av.d { background: linear-gradient(135deg, var(--ink), var(--terra)); }
+  .ar-body .author-line .nm { font-size: 12.5px; color: var(--ink-soft); font-weight: 500; }
+  .ar-body .author-line .scrap { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: .08em; cursor: pointer; }
+  .ar-body .author-line .scrap:hover { color: var(--terra); }
+  .ar-thumb { aspect-ratio: 16/10; background: var(--bg); overflow: hidden; border-radius: 4px; }
+  .ar-thumb svg { width: 100%; height: 100%; }
+
+  .highlight-cta { background: var(--paper); border: 1px solid var(--line); padding: 44px 48px; margin: 16px 0 24px; display: flex; align-items: center; justify-content: space-between; gap: 32px; position: relative; overflow: hidden; border-radius: 6px; }
+  .highlight-cta::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--ochre); }
+  .highlight-cta .left { display: flex; align-items: center; gap: 20px; }
+  .highlight-cta .emo { font-family: var(--serif); font-size: 44px; color: var(--terra); line-height: 1; font-weight: 700; }
+  .highlight-cta h3 { font-family: var(--serif-kr); font-size: 22px; font-weight: 700; margin: 0; line-height: 1.5; letter-spacing: -0.02em; }
+  .highlight-cta h3 mark { background: linear-gradient(180deg, transparent 60%, var(--ochre) 60%); padding: 0 4px; color: var(--ink); }
+  .highlight-cta .btn { background: var(--ink); color: #fff; padding: 13px 24px; font-size: 14px; font-weight: 600; transition: background .15s; flex-shrink: 0; border-radius: 4px; }
+  .highlight-cta .btn:hover { background: var(--terra); }
+
+  .collections { background: var(--surface-2); padding: 76px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .col-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .col-card { background: var(--paper); border: 1px solid var(--line); overflow: hidden; cursor: pointer; transition: all .2s; display: flex; flex-direction: column; border-radius: 6px; }
+  .col-card:hover { border-color: var(--terra); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.05); }
+  .col-card .cv { aspect-ratio: 4/3; position: relative; overflow: hidden; }
+  .col-card .cv svg { width: 100%; height: 100%; }
+  .col-card .count { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,.65); color: #fff; padding: 4px 10px; font-size: 11px; font-family: var(--mono); font-weight: 500; border-radius: 2px; }
+  .col-card .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .col-card h4 { font-family: var(--serif-kr); font-size: 15px; font-weight: 700; margin: 0; line-height: 1.5; letter-spacing: -0.02em; }
+  .col-card .author { display: flex; align-items: center; gap: 8px; margin-top: auto; }
+  .col-card .av { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--ochre), var(--terra)); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 600; }
+  .col-card .nm { font-size: 12px; color: var(--ink-soft); flex: 1; font-weight: 500; }
+  .col-card .stats { display: flex; gap: 14px; padding-top: 10px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-mute); }
+
+  .carousel-sec { padding: 80px 0; background: var(--bg); }
+  .carousel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 32px; }
+  .carousel-head h2 { font-family: var(--serif-kr); font-size: 30px; font-weight: 700; margin: 0; letter-spacing: -0.025em; }
+  .carousel-head h2 em { color: var(--terra); font-style: normal; font-weight: 700; }
+  .car-nav { display: flex; gap: 8px; }
+  .car-nav button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--paper); cursor: pointer; transition: all .15s; font-size: 16px; color: var(--ink); }
+  .car-nav button:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .carousel-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
+  .car-card { aspect-ratio: 3/4; background: var(--paper); border: 1px solid var(--line); overflow: hidden; cursor: pointer; position: relative; transition: transform .2s; border-radius: 6px; }
+  .car-card:hover { transform: translateY(-3px); }
+  .car-card .img { height: 65%; }
+  .car-card .img svg { width: 100%; height: 100%; }
+  .car-card .info { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; height: 35%; }
+  .car-card h4 { font-family: var(--serif-kr); font-size: 14px; line-height: 1.45; margin: 0; font-weight: 700; letter-spacing: -0.02em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .car-card .cat { margin-top: auto; font-family: var(--mono); font-size: 10px; color: var(--terra); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+
+  .authors-sec { padding: 32px 0 80px; background: var(--bg); }
+  .auth-block { padding: 44px 0; border-top: 1px solid var(--line-strong); display: grid; grid-template-columns: 320px 1fr; gap: 48px; }
+  .auth-block:last-child { border-bottom: 1px solid var(--line-strong); }
+  .auth-info { padding-right: 24px; }
+  .auth-info .head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .auth-info .av { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--ochre), var(--terra)); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px; }
+  .auth-info .av.b { background: linear-gradient(135deg, var(--forest), var(--terra-deep)); }
+  .auth-info .av.c { background: linear-gradient(135deg, var(--terra), var(--ochre)); }
+  .auth-info .num { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); letter-spacing: .1em; }
+  .auth-info h3 { font-family: var(--serif-kr); font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+  .auth-info p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; margin: 14px 0 18px; }
+  .auth-info .more { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); font-weight: 500; border-bottom: 1px solid var(--ink); padding-bottom: 2px; }
+  .auth-info .alarm { display: inline-block; margin-top: 10px; padding: 6px 12px; background: var(--ink); color: #fff; font-size: 12px; border-radius: 999px; font-family: var(--mono); letter-spacing: .04em; cursor: pointer; font-weight: 500; }
+  .auth-articles { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .auth-art { cursor: pointer; transition: opacity .2s; }
+  .auth-art:hover { opacity: .85; }
+  .auth-art .img { aspect-ratio: 16/10; background: var(--bg); overflow: hidden; margin-bottom: 12px; border-radius: 4px; }
+  .auth-art .img svg { width: 100%; height: 100%; }
+  .auth-art h4 { font-family: var(--serif-kr); font-size: 16px; line-height: 1.5; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+
+  footer { background: var(--ink); color: rgba(255,255,255,.7); padding: 64px 0 32px; font-size: 13px; line-height: 1.75; }
+  .ft-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 56px; }
+  .ft-grid h5 { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .14em; margin: 0 0 18px; font-family: var(--mono); }
+  .ft-grid a { display: block; padding: 4px 0; color: rgba(255,255,255,.7); font-weight: 400; transition: color .15s; }
+  .ft-grid a:hover { color: var(--ochre); }
+  .ft-brand { font-family: var(--serif); font-size: 26px; color: #fff; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.03em; }
+  .ft-tag { font-family: var(--serif-kr); color: rgba(255,255,255,.85); font-size: 14px; line-height: 1.7; margin-bottom: 22px; font-weight: 500; }
+  .ft-phone { color: var(--ochre); font-size: 18px; font-weight: 600; font-family: var(--mono); margin-bottom: 4px; display: block; }
+  .ft-time { font-size: 12px; color: rgba(255,255,255,.5); }
+  .ft-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 24px; }
+  .ft-bottom .legal { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; }
+  .ft-bottom .legal a { color: rgba(255,255,255,.6); }
+  .ft-bottom .legal a:hover { color: #fff; }
+  .ft-bottom .legal a.bold { font-weight: 500; color: rgba(255,255,255,.85); }
+  .ft-corp { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.75; }
+  .ft-corp p { margin: 4px 0; }
+  .ft-copy { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.4); margin-top: 22px; letter-spacing: .04em; }
+
+  @media (max-width: 980px) {
+    .hero-grid, .three-col, .top-grid, .col-grid, .nl-grid, .ft-grid, .auth-block, .auth-articles, .playbook-grid, .carousel-grid { grid-template-columns: 1fr 1fr; }
+    .article-row { grid-template-columns: 50px 1fr; }
+    .article-row .ar-thumb { display: none; }
+    .highlight-cta { flex-direction: column; align-items: flex-start; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 18px; }
+    .hero-grid, .three-col, .top-grid, .col-grid, .nl-grid, .ft-grid, .auth-block, .auth-articles, .playbook-grid, .carousel-grid { grid-template-columns: 1fr; }
+    nav.primary { display: none; }
+    .editor-pick h2, .nl h2, .section-h h2, .tw-head h2, .carousel-head h2 { font-size: 24px; }
+    .ar-body h3 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100">
+      <rect width="100" height="100" fill="transparent"/>
+      <circle cx="20" cy="30" r="0.5" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="60" cy="80" r="0.4" fill="rgba(255,255,255,0.2)"/>
+      <circle cx="80" cy="20" r="0.6" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="40" cy="60" r="0.3" fill="rgba(255,255,255,0.2)"/>
+    </pattern>
+  </defs>
+</svg>
+
+<div class="util">
+  <div class="wrap row">
+    <div class="left">
+      <a href="#">humanaid</a>
+      <a href="field-notes.html">Field Notes</a>
+      <a href="#">Builder Hub</a>
+    </div>
+    <div class="right">
+      <a href="#">매거진 RSS</a>
+      <a href="#">English</a>
+    </div>
+  </div>
+</div>
+
+<header class="main">
+  <div class="wrap row">
+    <a href="#" class="logo">humanaid<span class="dot"></span></a>
+    <nav class="primary">
+      <a href="#" class="active">매거진</a>
+      <a href="field-notes.html">필드 노트</a>
+      <a href="#">빌더 작가들</a>
+      <a href="#">컬렉션</a>
+      <a href="#">물어봐 AI</a>
+      <a href="#">데이터룸</a>
+    </nav>
+    <div class="header-right">
+      <a href="#" class="ad">파트너 제휴</a>
+      <a href="#" class="author">작가 지원</a>
+      <a href="#" class="login">로그인</a>
+      <a href="#" class="signup">회원가입</a>
+    </div>
+  </div>
+</header>
+
+<div class="cats">
+  <div class="wrap row">
+    <a href="#" class="on">최신</a>
+    <a href="#">인기</a>
+    <a href="#">AI</a>
+    <a href="#">반도체</a>
+    <a href="#">로보틱스</a>
+    <a href="#">바이오테크</a>
+    <a href="#">디지털 휴먼</a>
+    <a href="#">양자컴퓨팅</a>
+    <a href="#">우주</a>
+    <a href="#">사이버보안</a>
+    <a href="#">개발자</a>
+    <a href="#">스타트업</a>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <article class="editor-pick">
+      <div class="label">Editor's Pick · Collection</div>
+      <h2>AI가 깊어질수록, <span>사람의 질문이 더 필요한 곳</span><br>편집자가 다시 펼친 일곱 편의 기술 에세이</h2>
+      <div class="pick-author">
+        <div class="avatar">RS</div>
+        <div class="meta">
+          <b>류서원</b>편집장 · humanaid 데스크
+        </div>
+      </div>
+      <a href="#" class="pick-link">현재 주목받는 컬렉션 보기 →</a>
+    </article>
+    <aside class="signup-card">
+      <h3>아직도 트렌드만 따라가시나요?<br>기술의 본질을 함께 읽어요.</h3>
+      <p>지금 회원가입하면 매주 기술 리포트와<br>인사이트를 스크랩해 둘 수 있어요.</p>
+      <a href="#" class="btn">무료로 시작하기 →</a>
+    </aside>
+  </div>
+</section>
+
+<section class="wrap three-col">
+  <div class="col-block">
+    <h4>이번 주 가장 많이 읽힌 글 <a href="#">전체보기 →</a></h4>
+    <ul class="mini-list">
+      <li><span class="num">1</span><a href="#" class="ttl">AI 코딩 어시스턴트의 진짜 생산성, 한국 개발자 1,200명에게 물었다<small>AI · 9분</small></a></li>
+      <li><span class="num">2</span><a href="#" class="ttl">디지털 휴먼이라는 이름, 죽음 이후의 정체성을 추적한 6개월<small>디지털휴먼 · 11분</small></a></li>
+      <li><span class="num">3</span><a href="#" class="ttl">한국 반도체 산업의 다음 10년, HBM 이후 무엇이 달라져야 하나<small>반도체 · 7분</small></a></li>
+      <li><span class="num">4</span><a href="#" class="ttl">AI로 본 글로벌 GPU 공급망의 보틀넥 지도<small>데이터 · 6분</small></a></li>
+    </ul>
+  </div>
+  <div class="col-block">
+    <h4>독자가 밑줄 그은 문장 <a href="#">전체보기 →</a></h4>
+    <ul class="mini-list quote-list">
+      <li><div class="q">효율은 종종 누군가의 시간을 의미한다. 우리가 어디에서 빨라졌는지 매일 다시 확인해야 했다.</div><div class="src">— 〈AI 시대의 노동〉 中</div></li>
+      <li><div class="q">코드는 짜고 있는데 의도는 늘 제때 도착하지 않았다. 우리는 결과물이 아니라 사람을 향해야 한다.</div><div class="src">— 〈프로덕트 노트〉 中</div></li>
+      <li><div class="q">기술에서 가장 강력한 도구는 이름을 부르는 일이었다. 데이터가 다시 사람으로 돌아오는 순간.</div><div class="src">— 〈필드 다이어리, 판교〉 中</div></li>
+    </ul>
+  </div>
+  <div class="col-block">
+    <h4>요즘 주목하는 작가 <a href="#">전체보기 →</a></h4>
+    <ul class="mini-list author-list">
+      <li><div class="av">JD</div><div><div class="nm">정도훈</div><div class="desc">AI 안전성 연구자 · 카이스트 박사 출신, 전 OpenAI</div></div></li>
+      <li><div class="av b">MK</div><div><div class="nm">민가람</div><div class="desc">테크 저널리스트 · 〈경계의 알고리즘〉 저자</div></div></li>
+      <li><div class="av c">SY</div><div><div class="nm">심윤경</div><div class="desc">반도체 산업 분석가 · 전 SK하이닉스 시스템IC</div></div></li>
+      <li><div class="av d">PH</div><div><div class="nm">박하늘</div><div class="desc">바이오·로보틱스 연구자 · 보스턴 거주 4년차</div></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="playbook">
+  <div class="wrap">
+    <header class="section-h">
+      <div class="kicker">humanaid 활용 백서</div>
+      <h2>기술의 본질에 다가가는 <em>네 가지 방법</em></h2>
+    </header>
+    <div class="playbook-grid">
+      <div class="pb-card"><div class="pb-icon">¶</div><h5>스크랩</h5><p>읽다가 멈춘 리포트, 다시 펼쳐야 할 기술 에세이를 나의 노트에 모아두세요.</p><span class="arr">바로가기 →</span></div>
+      <div class="pb-card"><div class="pb-icon">⌖</div><h5>알림 습관</h5><p>새 모델이 출시되면 즉시, 새 리포트는 매일 아침 8시에 받아보세요.</p><span class="arr">바로가기 →</span></div>
+      <div class="pb-card"><div class="pb-icon">∞</div><h5>슬랙 봇</h5><p>팀과 공유하고 싶은 기술 인사이트를 동료의 슬랙 채널로 자동 전송.</p><span class="arr">바로가기 →</span></div>
+      <div class="pb-card"><div class="pb-icon">?</div><h5>물어봐 AI</h5><p>코드를 짤 때, 논문을 찾을 때 — 검증된 출처에 기반해 답합니다.</p><span class="arr">바로가기 →</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="nl">
+  <div class="wrap">
+    <div class="nl-grid">
+      <div class="left">
+        <h2>편집자가 직접 고른 <em>기술 인사이트,</em><br>매주 금요일 아침에.</h2>
+        <p>OpenAI, 엔비디아, 그리고 판교의 작은 스타트업까지.<br>기술 산업의 가장 중요한 변화 다섯 가지를 한 통의 메일로 정리해 보냅니다.</p>
+        <div class="nl-stats">
+          <div class="stat"><div class="n">42,300</div><div class="l">구독자</div></div>
+          <div class="stat"><div class="n">68%</div><div class="l">평균 오픈율</div></div>
+          <div class="stat"><div class="n">매주 금</div><div class="l">발행</div></div>
+        </div>
+      </div>
+      <form class="nl-form" onsubmit="event.preventDefault();">
+        <input type="email" placeholder="your@email.com" />
+        <div class="nl-checks">
+          <label><input type="checkbox" checked> 개인정보 수집·이용 동의 (필수)</label>
+          <label><input type="checkbox"> 마케팅 정보 수신 동의 (선택)</label>
+          <label><input type="checkbox"> 빌더 전용 콘텐츠 안내 (선택)</label>
+        </div>
+        <button type="submit">무료로 구독하기 →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="top-week">
+  <div class="wrap">
+    <div class="tw-head">
+      <h2><span class="week">4월 4주</span>독자가 가장 많이 본 리포트</h2>
+      <div class="meta">매주 일요일 자정 갱신</div>
+    </div>
+    <div class="top-grid">
+      <article class="top-card">
+        <div class="thumb pat-1"><svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><rect width="320" height="200" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="60" font-weight="700" fill="rgba(255,255,255,0.92)" letter-spacing="-0.04em">Copilot</text><text x="50%" y="80%" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="rgba(255,255,255,0.6)" letter-spacing="0.2em">DEV REPORT · APR 2026</text></svg></div>
+        <div class="body">
+          <div class="rank-wrap"><span class="rank">1</span><span class="new-badge">NEW</span></div>
+          <h3>AI 코딩 어시스턴트의 진짜 생산성, 한국 개발자 1,200명에게 물었다</h3>
+          <div class="footer-meta"><span class="cat">AI</span><span class="dot">·</span><span>9분</span><span class="dot">·</span><span style="color:var(--ochre);font-weight:600;">인기</span></div>
+        </div>
+      </article>
+      <article class="top-card">
+        <div class="thumb pat-2"><svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><rect width="320" height="200" fill="url(#grain)"/><path d="M0,160 Q80,120 160,140 T320,130 L320,200 L0,200 Z" fill="rgba(0,0,0,0.25)"/><path d="M0,170 Q80,140 160,160 T320,150 L320,200 L0,200 Z" fill="rgba(0,0,0,0.4)"/><text x="50%" y="48%" text-anchor="middle" font-family="Noto Serif KR" font-size="32" font-weight="700" fill="rgba(255,255,255,0.92)">Digital Human</text></svg></div>
+        <div class="body">
+          <div class="rank-wrap"><span class="rank">2</span><span class="new-badge">NEW</span></div>
+          <h3>디지털 휴먼이라는 이름, 죽음 이후의 정체성을 추적한 6개월</h3>
+          <div class="footer-meta"><span class="cat">디지털휴먼</span><span class="dot">·</span><span>11분</span><span class="dot">·</span><span style="color:var(--ochre);font-weight:600;">인기</span></div>
+        </div>
+      </article>
+      <article class="top-card">
+        <div class="thumb pat-3"><svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><rect width="320" height="200" fill="url(#grain)"/><g stroke="rgba(201,138,43,0.6)" stroke-width="1" fill="none"><line x1="40" y1="40" x2="280" y2="40"/><line x1="40" y1="80" x2="280" y2="80"/><line x1="40" y1="120" x2="280" y2="120"/><line x1="40" y1="160" x2="280" y2="160"/></g><polyline points="40,150 80,120 130,135 170,90 220,100 270,55" fill="none" stroke="#C98A2B" stroke-width="2.5"/><text x="50%" y="30%" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="rgba(255,255,255,0.6)" letter-spacing="0.18em">HBM · 2014–2026</text></svg></div>
+        <div class="body">
+          <div class="rank-wrap"><span class="rank">3</span><span class="new-badge">NEW</span></div>
+          <h3>한국 반도체 산업의 다음 10년, HBM 이후 무엇이 달라져야 하나</h3>
+          <div class="footer-meta"><span class="cat">반도체</span><span class="dot">·</span><span>7분</span><span class="dot">·</span><span style="color:var(--ochre);font-weight:600;">인기</span></div>
+        </div>
+      </article>
+      <article class="top-card">
+        <div class="thumb pat-4"><svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice"><rect width="320" height="200" fill="url(#grain)"/><g fill="rgba(0,0,0,0.2)"><circle cx="60" cy="80" r="22"/><circle cx="120" cy="120" r="14"/><circle cx="180" cy="60" r="18"/><circle cx="240" cy="100" r="26"/><circle cx="280" cy="140" r="10"/></g><g fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"><line x1="60" y1="80" x2="120" y2="120"/><line x1="120" y1="120" x2="180" y2="60"/><line x1="180" y1="60" x2="240" y2="100"/><line x1="240" y1="100" x2="280" y2="140"/></g><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="28" font-weight="700" fill="rgba(255,255,255,0.95)">GPU map</text></svg></div>
+        <div class="body">
+          <div class="rank-wrap"><span class="rank">4</span><span class="delta up">2</span></div>
+          <h3>AI로 본 글로벌 GPU 공급망의 보틀넥 지도</h3>
+          <div class="footer-meta"><span class="cat">데이터</span><span class="dot">·</span><span>6분</span><span class="dot">·</span><span style="color:var(--ochre);font-weight:600;">인기</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="articles">
+  <div class="wrap">
+    <div class="article-list">
+      <article class="article-row">
+        <div class="ar-rank"><span class="badge-new">NEW</span>1</div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">AI 인프라</span><span class="min">7분</span></div>
+          <h3>AI 모델 추론 비용 분석: GPU 시간이 사라지는 30%</h3>
+          <p>국내 5개 AI 스타트업의 GPU 사용량 데이터 4개월치를 분석했다. 추론 요청부터 응답까지의 평균 거리는 1.6초. 그 사이 어디에서 무엇이 사라지는지 단계별로 따라가 본다.</p>
+          <div class="author-line"><div class="av">SY</div><span class="nm">심윤경 · 반도체 산업 분석가</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-5"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="rgba(201,138,43,0.7)"><rect x="20" y="100" width="22" height="30"/><rect x="50" y="80" width="22" height="50"/><rect x="80" y="60" width="22" height="70"/><rect x="110" y="90" width="22" height="40"/><rect x="140" y="50" width="22" height="80"/><rect x="170" y="70" width="22" height="60"/><rect x="200" y="40" width="22" height="90"/></g></svg></div>
+      </article>
+      <article class="article-row">
+        <div class="ar-rank"><span class="badge-new">NEW</span>2</div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">로보틱스</span><span class="min">12분</span><span class="pop">인기</span></div>
+          <h3>휴머노이드 로봇의 두 번째 겨울, 시민 로봇 1년 보고서</h3>
+          <p>피규어AI와 옵티머스가 가정에 들어온 지 1년. 보스턴에서 4년째 활동 중인 연구자가 정리한 일반 가정 베타 테스트의 1년. 평균 가동 시간, 학습 사이클, 가족별 적응 매뉴얼까지 — 우리의 일상 지도가 어떻게 바뀌었는지 짚어본다.</p>
+          <div class="author-line"><div class="av b">PH</div><span class="nm">박하늘 · 바이오·로보틱스 연구자</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-6"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g stroke="rgba(255,255,255,0.4)" stroke-width="0.7" fill="none"><path d="M0,75 Q60,55 120,75 T240,75"/><path d="M0,90 Q60,70 120,90 T240,90"/><path d="M0,105 Q60,85 120,105 T240,105"/><path d="M0,60 Q60,40 120,60 T240,60"/></g><text x="50%" y="52%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.9)">winter II</text></svg></div>
+      </article>
+      <article class="article-row">
+        <div class="ar-rank"><span class="badge-num">3</span></div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">AI</span><span class="min">9분</span><span class="pop">인기</span></div>
+          <h3>실리콘밸리에서 만난 한국인 AI 엔지니어 12인의 기록</h3>
+          <p>팰로앨토 OpenAI 본사 인근에서 한 달, 시니어 리서처·MLOps·인프라 엔지니어 12인의 일과를 따라갔다. 이민이라는 단어로는 다 담을 수 없는 일상의 기술.</p>
+          <div class="author-line"><div class="av c">JD</div><span class="nm">정도훈 · AI 안전성 연구자</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-1"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="rgba(255,255,255,0.85)"><circle cx="120" cy="75" r="3"/><path d="M105,75 L135,75 M120,60 L120,90" stroke="rgba(255,255,255,0.85)" stroke-width="2"/></g><circle cx="120" cy="75" r="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/><circle cx="120" cy="75" r="58" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/></svg></div>
+      </article>
+      <article class="article-row">
+        <div class="ar-rank"><span class="badge-new">NEW</span>4</div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">AI 평가</span><span class="min">10분</span></div>
+          <h3>AI 모델 평가 지표 다시 짚기: MMLU, HumanEval, MMMU의 의미</h3>
+          <p>주요 LLM 벤치마크가 매달 발표되는 새 모델 발표문의 의미를 다시 짚어본다. 점수가 사람으로 돌아오는 자리에서, 우리가 놓치고 있던 것은 무엇인가.</p>
+          <div class="author-line"><div class="av d">MK</div><span class="nm">민가람 · 테크 저널리스트</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-2"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g><rect x="20" y="20" width="40" height="110" fill="rgba(255,255,255,0.15)"/><rect x="20" y="50" width="40" height="80" fill="rgba(255,255,255,0.25)"/><rect x="20" y="80" width="40" height="50" fill="rgba(255,255,255,0.4)"/><rect x="20" y="105" width="40" height="25" fill="rgba(255,255,255,0.6)"/><rect x="80" y="15" width="40" height="115" fill="rgba(255,255,255,0.15)"/><rect x="80" y="40" width="40" height="90" fill="rgba(255,255,255,0.25)"/><rect x="80" y="70" width="40" height="60" fill="rgba(255,255,255,0.4)"/><rect x="80" y="100" width="40" height="30" fill="rgba(255,255,255,0.6)"/><rect x="140" y="10" width="40" height="120" fill="rgba(255,255,255,0.15)"/><rect x="140" y="35" width="40" height="95" fill="rgba(255,255,255,0.25)"/><rect x="140" y="60" width="40" height="70" fill="rgba(255,255,255,0.4)"/><rect x="140" y="95" width="40" height="35" fill="rgba(255,255,255,0.6)"/></g></svg></div>
+      </article>
+      <article class="article-row">
+        <div class="ar-rank"><span class="badge-new">NEW</span>5</div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">트렌드</span><span class="min">8분</span><span class="pop">인기</span></div>
+          <h3>ChatGPT 출시 3년, AI는 우리 일상을 어떻게 바꿨나</h3>
+          <p>일상 활용도 92%, 그러나 깊이 있는 활용은 17%. 숫자 너머에서 무엇이 더디게 흘러가는지, 도쿄·서울·교토를 다녀온 실사용 보고.</p>
+          <div class="author-line"><div class="av">YR</div><span class="nm">유리아 · 도쿄 통신원</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-7"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><path d="M0,90 L40,80 L80,95 L120,70 L160,85 L200,60 L240,75 L240,150 L0,150 Z" fill="rgba(201,138,43,0.4)"/><path d="M0,110 L60,100 L120,108 L180,95 L240,105 L240,150 L0,150 Z" fill="rgba(201,138,43,0.6)"/><text x="50%" y="35%" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="rgba(255,255,255,0.6)" letter-spacing="0.15em">GPT · 1095 DAYS</text></svg></div>
+      </article>
+      <article class="article-row">
+        <div class="ar-rank"><span class="badge-num">6</span></div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">로보틱스</span><span class="min">6분</span></div>
+          <h3>테슬라 옵티머스 v3 출시, 한국 제조업의 대응 매뉴얼</h3>
+          <p>테슬라가 출시하기 전, 일부 한국 제조 라인은 이미 스스로 대비하고 있었다. 자동차·전자·식품 3개 업종의 72시간 대응 매뉴얼을 처음부터 끝까지 풀어본다.</p>
+          <div class="author-line"><div class="av c">LJ</div><span class="nm">이주연 · 동남아 테크 리서처</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-3"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="none" stroke="rgba(201,138,43,0.7)" stroke-width="1"><path d="M30,120 L60,80 L90,110 L120,60 L150,90 L180,50 L210,80"/><path d="M30,140 L60,100 L90,130 L120,80 L150,110 L180,70 L210,100" stroke="rgba(255,255,255,0.4)"/></g><text x="50%" y="30%" text-anchor="middle" font-family="Noto Serif KR" font-size="20" font-weight="700" fill="rgba(255,255,255,0.85)">72 hours</text></svg></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="highlight-cta">
+    <div class="left">
+      <span class="emo">¶</span>
+      <h3>humanaid 멤버가 되어 <mark>형광펜</mark>을 그어보세요.<br>당신의 노트가 다음 리포트의 단서가 됩니다.</h3>
+    </div>
+    <a href="#" class="btn">회원가입 →</a>
+  </div>
+</div>
+
+<section class="collections">
+  <div class="wrap">
+    <header class="section-h">
+      <div class="kicker">Featured Collections</div>
+      <h2>기술의 맥락을 모은 <em>편집자 컬렉션</em></h2>
+    </header>
+    <div class="col-grid">
+      <article class="col-card"><div class="cv pat-1"><span class="count">14편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.95)">엔지니어 필독서</text></svg></div><div class="body"><h4>AI 엔지니어 필독서 14권</h4><div class="author"><div class="av">JD</div><span class="nm">정도훈</span></div><div class="stats"><span>읽음 1.5K</span><span>스크랩 23</span></div></div></article>
+      <article class="col-card"><div class="cv pat-2"><span class="count">5편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.95)">빅테크 인사이드</text></svg></div><div class="body"><h4>빅테크 인사이드 르포 모아보기</h4><div class="author"><div class="av">MK</div><span class="nm">민가람</span></div><div class="stats"><span>읽음 2.4K</span><span>스크랩 41</span></div></div></article>
+      <article class="col-card"><div class="cv pat-3"><span class="count">10편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.95)">2026 LLM 트렌드</text></svg></div><div class="body"><h4>2026 상반기 LLM 핵심 이슈</h4><div class="author"><div class="av">SY</div><span class="nm">심윤경</span></div><div class="stats"><span>읽음 1.6K</span><span>스크랩 28</span></div></div></article>
+      <article class="col-card"><div class="cv pat-4"><span class="count">8편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.95)">입문자 가이드</text></svg></div><div class="body"><h4>입문자가 알아야 할 AI 활용 가이드</h4><div class="author"><div class="av">RS</div><span class="nm">류서원</span></div><div class="stats"><span>읽음 3.2K</span><span>스크랩 67</span></div></div></article>
+      <article class="col-card"><div class="cv pat-5"><span class="count">11편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="20" font-weight="700" fill="rgba(255,255,255,0.95)">글로벌 빅테크</text></svg></div><div class="body"><h4>글로벌 빅테크 인사이드</h4><div class="author"><div class="av">LJ</div><span class="nm">이주연</span></div><div class="stats"><span>읽음 2.0K</span><span>스크랩 35</span></div></div></article>
+      <article class="col-card"><div class="cv pat-6"><span class="count">9편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.95)">해커톤 가이드</text></svg></div><div class="body"><h4>처음 떠나는 해커톤·오픈소스 가이드</h4><div class="author"><div class="av">PH</div><span class="nm">박하늘</span></div><div class="stats"><span>읽음 4.1K</span><span>스크랩 89</span></div></div></article>
+      <article class="col-card"><div class="cv pat-7"><span class="count">22편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.95)">AI 윤리의 최전선</text></svg></div><div class="body"><h4>AI 윤리와 디지털 시민의 최전선</h4><div class="author"><div class="av">YR</div><span class="nm">유리아</span></div><div class="stats"><span>읽음 5.3K</span><span>스크랩 102</span></div></div></article>
+      <article class="col-card"><div class="cv pat-1"><span class="count">13편</span><svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice"><rect width="240" height="180" fill="url(#grain)"/><text x="50%" y="50%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.95)">데이터로 본 격차</text></svg></div><div class="body"><h4>데이터로 다시 보는 AI 격차</h4><div class="author"><div class="av">SY</div><span class="nm">심윤경</span></div><div class="stats"><span>읽음 1.9K</span><span>스크랩 44</span></div></div></article>
+    </div>
+  </div>
+</section>
+
+<section class="carousel-sec">
+  <div class="wrap">
+    <div class="carousel-head">
+      <h2><em>오늘의</em> 토픽</h2>
+      <div class="car-nav"><button>←</button><button>→</button></div>
+    </div>
+    <div class="carousel-grid">
+      <article class="car-card"><div class="img pat-2"><svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"><rect width="200" height="200" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="18" font-weight="700" fill="rgba(255,255,255,0.92)">실리콘밸리</text></svg></div><div class="info"><h4>팰로앨토에서 본 GPT-5의 어떤 단면, 7일간의 동행 기록</h4><span class="cat">AI</span></div></article>
+      <article class="car-card"><div class="img pat-3"><svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"><rect width="200" height="200" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="20" font-weight="700" fill="rgba(255,255,255,0.92)">베이징</text></svg></div><div class="info"><h4>딥시크 이후, 중국 AI가 꺼내든 다음 카드</h4><span class="cat">AI</span></div></article>
+      <article class="car-card"><div class="img pat-4"><svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"><rect width="200" height="200" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.92)">판교</text></svg></div><div class="info"><h4>한국 빅테크 사옥을 다녀온 6개월, 사람과 시스템</h4><span class="cat">산업</span></div></article>
+      <article class="car-card"><div class="img pat-5"><svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"><rect width="200" height="200" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.92)">도쿄</text></svg></div><div class="info"><h4>라쿠텐과 NTT가 그리는 일본 AI 지도</h4><span class="cat">산업</span></div></article>
+      <article class="car-card"><div class="img pat-6"><svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"><rect width="200" height="200" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="20" font-weight="700" fill="rgba(255,255,255,0.92)">텔아비브</text></svg></div><div class="info"><h4>이스라엘 사이버보안 스타트업 50개 르포</h4><span class="cat">사이버보안</span></div></article>
+    </div>
+  </div>
+</section>
+
+<section class="authors-sec">
+  <div class="wrap">
+    <div class="auth-block">
+      <div class="auth-info">
+        <div class="head"><div class="av">HD</div><div><div class="num">AUTHOR · 01</div><h3>humanaid 데스크</h3></div></div>
+        <p>기술과 사람 사이를 오가는 humanaid 자체 편집부. 매일 한 편의 검증된 리포트와 격주 한 편의 심층 에세이를 발행합니다. 우리는 코드와 모델 너머의 사람을 잊지 않으려 노력합니다.</p>
+        <a href="#" class="more">필자 페이지 →</a>
+        <span class="alarm">+ 알림 받기</span>
+      </div>
+      <div class="auth-articles">
+        <article class="auth-art"><div class="img pat-7"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.9)">dev journal</text></svg></div><h4>막힐 때마다 직접 만들었더니, 풀스택 빌더가 된 사연</h4></article>
+        <article class="auth-art"><div class="img pat-1"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="22" font-weight="700" fill="rgba(255,255,255,0.9)">research lab</text></svg></div><h4>AI 도입 이전에 책임: 리더가 점검해야 할 세 가지 원칙</h4></article>
+      </div>
+    </div>
+    <div class="auth-block">
+      <div class="auth-info">
+        <div class="head"><div class="av b">CB</div><div><div class="num">AUTHOR · 02</div><h3>코드 너머의 사람들</h3></div></div>
+        <p>기술과 사회의 접점을 책으로 엮는 비영리 에디토리얼 콜렉티브. 프리랜서 엔지니어, 연구자, 디자이너가 모여 만든 이 팀은 매년 두 권의 단행본과 12편의 심층 에세이를 humanaid에 공개합니다.</p>
+        <a href="#" class="more">필자 페이지 →</a>
+        <span class="alarm">+ 알림 받기</span>
+      </div>
+      <div class="auth-articles">
+        <article class="auth-art"><div class="img pat-2"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-weight="700" font-size="20" fill="rgba(255,255,255,0.92)">엔지니어 윤리</text></svg></div><h4>코드를 쓸 때 지켜야 할 일곱 가지: 엔지니어 윤리 가이드</h4></article>
+        <article class="auth-art"><div class="img pat-3"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-weight="700" font-size="20" fill="rgba(255,255,255,0.92)">묻혀버린 기술</text></svg></div><h4>관심에서 사라진 기술 9가지, 다시 펼쳐 보는 지도</h4></article>
+      </div>
+    </div>
+    <div class="auth-block">
+      <div class="auth-info">
+        <div class="head"><div class="av c">NB</div><div><div class="num">AUTHOR · 03</div><h3>지금 빌딩합니다</h3></div></div>
+        <p>매주 한 번, 작은 변화를 만들고 싶은 빌더들에게 보내는 기술 뉴스레터. 다음 사이드 프로젝트가 궁금한 사람, 부캐 너머를 고민하는 사람에게 가장 먼저 도착하는 한 통의 편지입니다.</p>
+        <a href="#" class="more">필자 페이지 →</a>
+        <span class="alarm">+ 알림 받기</span>
+      </div>
+      <div class="auth-articles">
+        <article class="auth-art"><div class="img pat-4"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-weight="700" font-size="18" fill="rgba(255,255,255,0.92)">Cursor Pro 1년</text></svg></div><h4>매달 9.99달러의 Cursor Pro, 1년 후 진짜로 무엇이 바뀌었나</h4></article>
+        <article class="auth-art"><div class="img pat-5"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-weight="700" font-size="18" fill="rgba(255,255,255,0.92)">AI 임팩트 보고</text></svg></div><h4>임팩트 보고서를 내는 AI 회사와 내지 않는 회사의 결정적 차이</h4></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <div class="ft-brand">humanaid</div>
+        <div class="ft-tag">사람과 AI, 디지털을 잇는 기술 매거진.</div>
+        <a href="tel:0269254867" class="ft-phone">02-6925-4867</a>
+        <div class="ft-time">10:00–18:00 (주말·공휴일 제외)</div>
+        <a href="mailto:hello@humanaid.digital" style="color:rgba(255,255,255,.65); margin-top:12px; display:inline-block;">hello@humanaid.digital</a>
+      </div>
+      <div><h5>서비스</h5><a href="field-notes.html">필드 노트</a><a href="#">데이터룸</a><a href="#">컬렉션</a><a href="#">물어봐 AI</a><a href="#">슬랙 봇</a></div>
+      <div><h5>humanaid</h5><a href="#">소개</a><a href="#">작가 지원</a><a href="#">파트너 제휴</a><a href="#">콘텐츠 제안</a><a href="#">광고 문의</a></div>
+      <div><h5>구독·앱</h5><a href="#">뉴스레터</a><a href="#">크롬 확장 프로그램</a><a href="#">슬랙 봇 설치</a><a href="#">RSS</a></div>
+    </div>
+    <div class="ft-bottom">
+      <div class="legal"><a href="#" class="bold">이용약관</a><a href="#" class="bold">개인정보 처리방침</a><a href="#">청소년보호정책</a><a href="#">윤리강령</a><a href="#">데이터 보안 가이드</a></div>
+      <div class="ft-corp">
+        <p>(주)휴머네이드 · 대표이사 김지현</p>
+        <p>서울특별시 종로구 사직로 123, 5층</p>
+        <p>사업자등록번호 : 123-45-67890 · 인터넷신문등록번호 : 서울,아54129</p>
+        <p>제호 : humanaid · 발행인 김지현 · 편집인 류서원</p>
+        <p>등록일 : 2024년 03월 15일 · 발행일 : 2024년 04월 01일</p>
+        <div class="ft-copy">© 2024–2026 humanaid Inc. All rights reserved.</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

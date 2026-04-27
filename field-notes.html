@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Field Notes — 빌더의 책상에서 도착한 메모, humanaid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F4;
+    --ink: #111111;
+    --ink-soft: #555555;
+    --ink-mute: #9A9A9A;
+    --line: #ECECEC;
+    --line-strong: #DCDCDC;
+    --terra: #B8412A;
+    --terra-deep: #8E2F1E;
+    --forest: #1F3A2E;
+    --ochre: #C98A2B;
+    --paper: #ffffff;
+    --serif: 'Noto Serif KR', serif;
+    --serif-kr: 'Noto Serif KR', serif;
+    --sans: 'Noto Sans KR', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--terra); color: #fff; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- Util bar (same as main) ---------- */
+  .util { background: var(--surface); color: var(--ink-soft); font-size: 12px; border-bottom: 1px solid var(--line); }
+  .util .row { display: flex; justify-content: space-between; align-items: center; height: 38px; }
+  .util a { color: var(--ink-soft); transition: color .15s; }
+  .util a:hover { color: var(--terra); }
+  .util .left { display: flex; gap: 22px; align-items: center; }
+  .util .left a { position: relative; }
+  .util .left a:first-child { font-weight: 600; color: var(--ink); font-size: 12.5px; }
+  .util .left a:first-child::after { content: ""; position: absolute; right: -12px; top: 50%; width: 1px; height: 11px; background: var(--line-strong); transform: translateY(-50%); }
+  .util .left a.active-util { color: var(--terra); font-weight: 600; }
+  .util .right { display: flex; gap: 22px; }
+
+  /* ---------- Main header (same as main) ---------- */
+  header.main { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 50; }
+  header.main .row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; height: 78px; gap: 48px; }
+  .logo { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: -0.03em; color: var(--ink); display: flex; align-items: baseline; gap: 4px; }
+  .logo .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--terra); display: inline-block; transform: translateY(-2px); margin-left: 2px; }
+  nav.primary { display: flex; gap: 30px; }
+  nav.primary a { font-size: 14.5px; font-weight: 500; color: var(--ink); padding: 6px 0; position: relative; transition: color .15s; }
+  nav.primary a:hover { color: var(--terra); }
+  nav.primary a.active { color: var(--terra); font-weight: 600; }
+  nav.primary a.active::after { content: ""; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: var(--terra); }
+  .header-right { display: flex; align-items: center; gap: 18px; }
+  .header-right .ad { font-size: 13px; color: var(--ink-soft); font-weight: 500; padding: 7px 13px; border: 1px solid var(--line-strong); border-radius: 999px; }
+  .header-right .author, .header-right .login { font-size: 14px; color: var(--ink-soft); font-weight: 500; }
+  .header-right .signup { font-size: 14px; font-weight: 600; background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 4px; }
+  .header-right .signup:hover { background: var(--terra); }
+
+  /* ---------- Hero section ---------- */
+  .fn-hero {
+    padding: 72px 0 48px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .fn-hero::before {
+    content: ""; position: absolute;
+    top: -80px; right: -80px; width: 320px; height: 320px;
+    background: radial-gradient(circle, var(--ochre) 0%, transparent 70%);
+    opacity: .14; filter: blur(40px);
+  }
+  .fn-hero-grid {
+    display: grid; grid-template-columns: 1.5fr 1fr;
+    gap: 64px; align-items: end;
+    position: relative; z-index: 2;
+  }
+  .fn-kicker {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--terra); font-weight: 500;
+    letter-spacing: .14em; text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .fn-kicker::before {
+    content: ""; width: 22px; height: 1px; background: var(--terra);
+  }
+  .fn-kicker .live {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--terra-deep);
+  }
+  .fn-kicker .live::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--terra); animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.9); }
+  }
+  .fn-hero h1 {
+    font-family: var(--serif-kr); font-weight: 700;
+    font-size: 56px; line-height: 1.2;
+    letter-spacing: -0.035em; margin: 0 0 22px;
+  }
+  .fn-hero h1 em {
+    font-style: normal; color: var(--terra); font-weight: 700;
+  }
+  .fn-hero h1 .underline {
+    background: linear-gradient(180deg, transparent 78%, var(--ochre) 78%);
+    padding: 0 4px;
+  }
+  .fn-hero .lede {
+    font-family: var(--serif-kr);
+    font-size: 17px; line-height: 1.75; font-weight: 400;
+    color: var(--ink-soft);
+    max-width: 580px; margin: 0;
+  }
+  .fn-stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    border-left: 1px solid var(--line-strong);
+    padding-left: 36px;
+  }
+  .fn-stat .n {
+    font-family: var(--serif); font-size: 38px;
+    font-weight: 700; color: var(--ink);
+    letter-spacing: -0.04em; line-height: 1;
+    margin-bottom: 6px;
+  }
+  .fn-stat .n .small { font-size: 18px; color: var(--terra); margin-left: 2px; }
+  .fn-stat .l {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+
+  /* ---------- Filter strip ---------- */
+  .fn-filter {
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 18px 0;
+    position: sticky; top: 78px; z-index: 30;
+  }
+  .filter-row {
+    display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
+  }
+  .filter-group {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .filter-group .lab {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); text-transform: uppercase;
+    letter-spacing: .1em; font-weight: 500;
+  }
+  .pills { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pill {
+    font-size: 12.5px; font-weight: 500;
+    padding: 5px 12px; border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink-soft);
+    cursor: pointer; transition: all .15s;
+    white-space: nowrap;
+  }
+  .pill:hover { color: var(--ink); border-color: var(--ink); }
+  .pill.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .pill.region.on { background: var(--terra); border-color: var(--terra); }
+
+  .filter-spacer { flex: 1; }
+  .filter-meta {
+    font-family: var(--mono); font-size: 11.5px;
+    color: var(--ink-mute);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .filter-meta .live-dot {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--terra);
+  }
+  .filter-meta .live-dot::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--terra); animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  /* ---------- Main timeline layout ---------- */
+  .fn-main {
+    padding: 56px 0 80px;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 64px;
+  }
+
+  /* ---------- Timeline ---------- */
+  .timeline { position: relative; }
+  .timeline::before {
+    content: ""; position: absolute;
+    left: 119px; top: 36px; bottom: 0;
+    width: 1px; background: var(--line-strong);
+  }
+
+  .day-header {
+    display: flex; align-items: baseline; gap: 18px;
+    margin: 56px 0 28px;
+    position: relative;
+  }
+  .day-header:first-child { margin-top: 0; }
+  .day-header .date-num {
+    font-family: var(--serif); font-weight: 700;
+    font-size: 44px; color: var(--ink);
+    letter-spacing: -0.04em; line-height: 1;
+    width: 100px; text-align: right;
+    flex-shrink: 0;
+  }
+  .day-header .date-meta {
+    border-left: 1px solid var(--line-strong);
+    padding-left: 24px;
+    flex: 1;
+  }
+  .day-header .month-year {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--ink-mute); letter-spacing: .12em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .day-header .day-title {
+    font-family: var(--serif-kr); font-size: 20px;
+    font-weight: 700; color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .day-header .count {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--terra); margin-left: 12px;
+    font-weight: 500;
+  }
+
+  /* Note item */
+  .note {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 40px;
+    padding: 24px 0;
+    position: relative;
+  }
+  .note-time {
+    text-align: right;
+    padding-top: 4px;
+    position: relative;
+  }
+  .note-time .t {
+    font-family: var(--mono); font-size: 13px;
+    color: var(--ink); font-weight: 600;
+    letter-spacing: .04em;
+  }
+  .note-time .tz {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--ink-mute); margin-top: 2px;
+    letter-spacing: .08em;
+  }
+  .note-time::after {
+    content: ""; position: absolute;
+    right: -22px; top: 12px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--paper); border: 2px solid var(--terra);
+    z-index: 2;
+  }
+  .note.urgent .note-time::after {
+    background: var(--terra); border-color: var(--terra);
+    box-shadow: 0 0 0 4px rgba(184,65,42,.18);
+  }
+
+  .note-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px 26px 24px;
+    transition: all .2s;
+    position: relative;
+  }
+  .note-card:hover {
+    border-color: var(--line-strong);
+    box-shadow: 0 6px 20px rgba(0,0,0,.04);
+  }
+  .note.urgent .note-card {
+    border-left: 3px solid var(--terra);
+  }
+
+  .note-meta {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .note-author {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .note-author .av {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--ochre), var(--terra));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 11px;
+    flex-shrink: 0;
+  }
+  .note-author .av.b { background: linear-gradient(135deg, var(--forest), var(--terra-deep)); }
+  .note-author .av.c { background: linear-gradient(135deg, var(--terra), var(--ochre)); }
+  .note-author .av.d { background: linear-gradient(135deg, var(--ink), var(--terra)); }
+  .note-author .av.e { background: linear-gradient(135deg, var(--ochre), var(--forest)); }
+  .note-author .nm { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .note-author .role { font-size: 11.5px; color: var(--ink-mute); margin-left: 6px; }
+
+  .note-loc {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-soft); font-weight: 500;
+    padding: 4px 10px; background: var(--surface-2);
+    border-radius: 999px;
+    letter-spacing: .04em;
+  }
+  .note-loc::before { content: "◦"; color: var(--terra); font-size: 14px; }
+
+  .note-tag {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--terra); font-weight: 600;
+    background: rgba(184,65,42,.08);
+    padding: 3px 8px; border-radius: 3px;
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  .note-tag.urgent { background: var(--terra); color: #fff; }
+  .note-tag.med { color: var(--forest); background: rgba(31,58,46,.1); }
+  .note-tag.kid { color: var(--ochre); background: rgba(201,138,43,.1); }
+  .note-tag.water { color: #2563EB; background: rgba(37,99,235,.1); }
+  .note-tag.food { color: #B45309; background: rgba(180,83,9,.1); }
+
+  .note-body {
+    font-family: var(--serif-kr);
+    font-size: 16px; line-height: 1.75;
+    color: var(--ink); font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+  .note-body p { margin: 0 0 12px; }
+  .note-body p:last-child { margin-bottom: 0; }
+  .note-body strong { color: var(--terra-deep); font-weight: 700; }
+
+  /* Polaroid image */
+  .note-polaroid {
+    background: #fff;
+    padding: 8px 8px 32px;
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+    transform: rotate(-1.2deg);
+    margin: 18px 0 8px;
+    display: inline-block;
+    max-width: 280px;
+    position: relative;
+  }
+  .note-polaroid.r { transform: rotate(1.5deg); }
+  .note-polaroid .img {
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .note-polaroid .img svg { width: 100%; height: 100%; display: block; }
+  .note-polaroid .cap {
+    font-family: 'Caveat', cursive, var(--sans);
+    font-size: 13px; color: var(--ink-soft);
+    text-align: center;
+    font-style: italic;
+  }
+  .note-polaroid::after {
+    content: ""; position: absolute;
+    top: -6px; left: 50%; transform: translateX(-50%) rotate(2deg);
+    width: 60px; height: 16px;
+    background: rgba(201,138,43,.5);
+    border-radius: 1px;
+  }
+  .polaroid-row {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin: 18px 0 8px;
+  }
+  .polaroid-row .note-polaroid { margin: 0; }
+
+  /* Voice memo */
+  .voice-memo {
+    background: var(--surface-2);
+    border: 1px dashed var(--line-strong);
+    border-radius: 6px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    margin: 14px 0 6px;
+  }
+  .voice-memo .play {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; cursor: pointer;
+    font-size: 11px;
+  }
+  .voice-memo .play::after {
+    content: "▶"; margin-left: 2px;
+  }
+  .voice-memo .wave {
+    flex: 1;
+    display: flex; align-items: center; gap: 2px;
+    height: 28px;
+  }
+  .voice-memo .wave span {
+    flex: 1; background: var(--ink-soft);
+    border-radius: 1px; opacity: .4;
+  }
+  .voice-memo .wave span:nth-child(odd) { opacity: .8; }
+  .voice-memo .dur {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--ink-soft); font-weight: 500;
+  }
+
+  /* Stat snapshot */
+  .stat-snap {
+    background: var(--ink);
+    color: #fff;
+    padding: 22px 26px;
+    border-radius: 6px;
+    margin: 14px 0 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-snap::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--terra), var(--ochre));
+  }
+  .stat-snap .item .n {
+    font-family: var(--serif); font-size: 28px;
+    font-weight: 700; color: var(--ochre);
+    letter-spacing: -0.03em; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-snap .item .l {
+    font-family: var(--mono); font-size: 10px;
+    color: rgba(255,255,255,.6);
+    text-transform: uppercase; letter-spacing: .1em;
+  }
+
+  /* Quote note */
+  .quote-note {
+    border-left: 3px solid var(--ochre);
+    padding: 14px 0 14px 22px;
+    margin: 14px 0 6px;
+  }
+  .quote-note .q {
+    font-family: var(--serif-kr); font-size: 18px;
+    line-height: 1.6; font-weight: 500;
+    color: var(--ink); margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  .quote-note .src {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); letter-spacing: .04em;
+  }
+
+  /* Note actions */
+  .note-actions {
+    display: flex; align-items: center; gap: 18px;
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .note-actions a {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); font-weight: 500;
+    text-transform: uppercase; letter-spacing: .08em;
+    transition: color .15s; cursor: pointer;
+  }
+  .note-actions a:hover { color: var(--terra); }
+  .note-actions a.scrap { margin-left: auto; }
+
+  /* ---------- Sidebar ---------- */
+  .fn-side {
+    position: sticky; top: 156px;
+    align-self: start;
+    height: fit-content;
+  }
+  .side-block {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 18px;
+  }
+  .side-block h3 {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--terra); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .14em;
+    margin: 0 0 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .region-list { list-style: none; padding: 0; margin: 0; }
+  .region-list li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .region-list li:last-child { border-bottom: 0; }
+  .region-list .nm {
+    font-family: var(--serif-kr); font-weight: 500;
+    color: var(--ink);
+  }
+  .region-list .ct {
+    margin-left: auto;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); font-weight: 500;
+  }
+  .region-list .heat {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line-strong);
+  }
+  .region-list .heat.h { background: var(--terra); }
+  .region-list .heat.m { background: var(--ochre); }
+  .region-list .heat.l { background: var(--forest); }
+
+  .author-side { padding: 0; }
+  .author-side .it {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .author-side .it:last-child { border-bottom: 0; }
+  .author-side .av {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--ochre), var(--terra));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 12px;
+    flex-shrink: 0;
+  }
+  .author-side .av.b { background: linear-gradient(135deg, var(--forest), var(--terra-deep)); }
+  .author-side .av.c { background: linear-gradient(135deg, var(--terra), var(--ochre)); }
+  .author-side .av.d { background: linear-gradient(135deg, var(--ink), var(--terra)); }
+  .author-side .info { flex: 1; min-width: 0; }
+  .author-side .nm { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .author-side .last {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-mute); margin-top: 1px;
+    letter-spacing: .04em;
+  }
+  .author-side .live-tag {
+    font-family: var(--mono); font-size: 9px;
+    color: var(--terra); font-weight: 700;
+    background: rgba(184,65,42,.1);
+    padding: 2px 6px; border-radius: 2px;
+    letter-spacing: .12em;
+    flex-shrink: 0;
+  }
+
+  .urgent-card {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 26px 24px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+    position: relative; overflow: hidden;
+  }
+  .urgent-card::before {
+    content: ""; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--terra);
+  }
+  .urgent-card .label {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--terra); font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-bottom: 10px;
+  }
+  .urgent-card .label::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--terra); animation: pulse 1.4s ease-in-out infinite;
+  }
+  .urgent-card h4 {
+    font-family: var(--serif-kr); font-size: 18px;
+    font-weight: 700; margin: 0 0 8px;
+    line-height: 1.5; letter-spacing: -0.02em;
+  }
+  .urgent-card p {
+    font-size: 13px; color: rgba(255,255,255,.7);
+    line-height: 1.65; margin: 0 0 16px;
+  }
+  .urgent-card .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ochre); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .1em;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--ochre);
+  }
+
+  .glossary p {
+    font-size: 12.5px; line-height: 1.65;
+    color: var(--ink-soft); margin: 0 0 10px;
+  }
+  .glossary p strong {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink); display: block;
+    margin-bottom: 2px; font-weight: 600;
+    letter-spacing: .04em;
+  }
+
+  /* ---------- Submit CTA ---------- */
+  .fn-submit {
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 64px 0;
+  }
+  .submit-grid {
+    display: grid; grid-template-columns: 1.4fr 1fr;
+    gap: 56px; align-items: center;
+  }
+  .fn-submit h2 {
+    font-family: var(--serif-kr); font-size: 32px;
+    font-weight: 700; margin: 0 0 14px;
+    letter-spacing: -0.025em; line-height: 1.4;
+  }
+  .fn-submit h2 em { color: var(--terra); font-style: normal; font-weight: 700; }
+  .fn-submit p {
+    font-size: 15px; color: var(--ink-soft);
+    line-height: 1.75; margin: 0;
+    max-width: 540px;
+  }
+  .submit-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 32px;
+    border-radius: 6px;
+  }
+  .submit-card h4 {
+    font-family: var(--serif-kr); font-size: 17px;
+    font-weight: 700; margin: 0 0 18px;
+  }
+  .submit-card .row-input {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 14px;
+  }
+  .submit-card label {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-mute); text-transform: uppercase;
+    letter-spacing: .12em; font-weight: 500;
+  }
+  .submit-card input, .submit-card textarea {
+    width: 100%;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    padding: 10px 12px; font-size: 14px;
+    font-family: var(--sans); color: var(--ink);
+    border-radius: 4px; outline: none;
+    transition: border-color .15s;
+  }
+  .submit-card input:focus, .submit-card textarea:focus { border-color: var(--terra); }
+  .submit-card textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+  .submit-card button {
+    width: 100%; background: var(--ink); color: #fff;
+    border: none; padding: 12px;
+    font-family: var(--sans); font-size: 14px; font-weight: 600;
+    border-radius: 4px; cursor: pointer; margin-top: 6px;
+    transition: background .15s;
+  }
+  .submit-card button:hover { background: var(--terra); }
+
+  /* ---------- Footer (same as main) ---------- */
+  footer { background: var(--ink); color: rgba(255,255,255,.7); padding: 64px 0 32px; font-size: 13px; line-height: 1.75; }
+  .ft-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 56px; }
+  .ft-grid h5 { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .14em; margin: 0 0 18px; font-family: var(--mono); }
+  .ft-grid a { display: block; padding: 4px 0; color: rgba(255,255,255,.7); transition: color .15s; }
+  .ft-grid a:hover { color: var(--ochre); }
+  .ft-brand { font-family: var(--serif); font-size: 26px; color: #fff; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.03em; }
+  .ft-tag { font-family: var(--serif-kr); color: rgba(255,255,255,.85); font-size: 14px; line-height: 1.7; margin-bottom: 22px; font-weight: 500; }
+  .ft-phone { color: var(--ochre); font-size: 18px; font-weight: 600; font-family: var(--mono); margin-bottom: 4px; display: block; }
+  .ft-time { font-size: 12px; color: rgba(255,255,255,.5); }
+  .ft-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 24px; }
+  .ft-bottom .legal { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; }
+  .ft-bottom .legal a { color: rgba(255,255,255,.6); }
+  .ft-bottom .legal a.bold { font-weight: 500; color: rgba(255,255,255,.85); }
+  .ft-corp { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.75; }
+  .ft-corp p { margin: 4px 0; }
+  .ft-copy { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.4); margin-top: 22px; letter-spacing: .04em; }
+
+  /* Generative thumbnail patterns */
+  .pat-1 { background: linear-gradient(135deg, #1F3A2E 0%, #B8412A 100%); }
+  .pat-2 { background: linear-gradient(160deg, #C98A2B 0%, #8E2F1E 100%); }
+  .pat-3 { background: linear-gradient(135deg, #1A1A1A 0%, #1F3A2E 100%); }
+  .pat-4 { background: linear-gradient(135deg, #B8412A 0%, #C98A2B 100%); }
+  .pat-5 { background: linear-gradient(135deg, #1F3A2E 0%, #1A1A1A 100%); }
+  .pat-6 { background: linear-gradient(135deg, #C98A2B 0%, #1F3A2E 100%); }
+  .pat-7 { background: linear-gradient(160deg, #8E2F1E 0%, #1A1A1A 100%); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1080px) {
+    .fn-main { grid-template-columns: 1fr; }
+    .fn-side { position: static; }
+    .fn-hero h1 { font-size: 44px; }
+    .fn-hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    .fn-stats { padding-left: 0; border-left: 0; border-top: 1px solid var(--line-strong); padding-top: 24px; }
+  }
+  @media (max-width: 720px) {
+    .wrap { padding: 0 18px; }
+    nav.primary { display: none; }
+    .fn-hero { padding: 48px 0 32px; }
+    .fn-hero h1 { font-size: 32px; }
+    .timeline::before { left: 20px; }
+    .day-header { gap: 16px; }
+    .day-header .date-num { font-size: 32px; width: 40px; }
+    .day-header .date-meta { padding-left: 16px; }
+    .note { grid-template-columns: 60px 1fr; gap: 18px; }
+    .note-time::after { right: -12px; }
+    .submit-grid, .ft-grid { grid-template-columns: 1fr; }
+    .stat-snap { grid-template-columns: 1fr 1fr; }
+    .filter-row { flex-direction: column; align-items: flex-start; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100">
+      <rect width="100" height="100" fill="transparent"/>
+      <circle cx="20" cy="30" r="0.5" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="60" cy="80" r="0.4" fill="rgba(255,255,255,0.2)"/>
+      <circle cx="80" cy="20" r="0.6" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="40" cy="60" r="0.3" fill="rgba(255,255,255,0.2)"/>
+    </pattern>
+  </defs>
+</svg>
+
+<!-- Top utility bar -->
+<div class="util">
+  <div class="wrap row">
+    <div class="left">
+      <a href="humanaid.html">humanaid</a>
+      <a href="field-notes.html" class="active-util">Field Notes</a>
+      <a href="#">Builder Hub</a>
+    </div>
+    <div class="right">
+      <a href="#">매거진 RSS</a>
+      <a href="#">English</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main header -->
+<header class="main">
+  <div class="wrap row">
+    <a href="humanaid.html" class="logo">humanaid<span class="dot"></span></a>
+    <nav class="primary">
+      <a href="humanaid.html">매거진</a>
+      <a href="field-notes.html" class="active">필드 노트</a>
+      <a href="#">빌더 작가들</a>
+      <a href="#">컬렉션</a>
+      <a href="#">물어봐 AI</a>
+      <a href="#">데이터룸</a>
+    </nav>
+    <div class="header-right">
+      <a href="#" class="ad">파트너 제휴</a>
+      <a href="#" class="author">작가 지원</a>
+      <a href="#" class="login">로그인</a>
+      <a href="#" class="signup">회원가입</a>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="fn-hero">
+  <div class="wrap fn-hero-grid">
+    <div>
+      <div class="fn-kicker">
+        <span>Field Notes</span>
+        <span style="color:var(--ink-mute);">·</span>
+        <span class="live">14명의 빌더가 지금 송고 중</span>
+      </div>
+      <h1>책상에서 도착한 <em>날것의 기록.</em><br><span class="underline">정제되기 전의 코드</span>와 메모가 모이는 자리.</h1>
+      <p class="lede">Field Notes는 정식 리포트가 되기 전, 엔지니어·연구자·디자이너·창업자가 실시간으로 보내는 짧은 메모입니다. 길지 않습니다. 다듬어지지도 않았습니다. 하지만 가장 빨리 도착하는 한 줄이 때로 가장 정확합니다.</p>
+    </div>
+    <div class="fn-stats">
+      <div class="fn-stat">
+        <div class="n">17<span class="small">명</span></div>
+        <div class="l">활동 중인 빌더 통신원</div>
+      </div>
+      <div class="fn-stat">
+        <div class="n">12<span class="small">개 도시</span></div>
+        <div class="l">현재 송고 거점</div>
+      </div>
+      <div class="fn-stat">
+        <div class="n">2,847</div>
+        <div class="l">누적 노트</div>
+      </div>
+      <div class="fn-stat">
+        <div class="n">26<span class="small">분 전</span></div>
+        <div class="l">마지막 업데이트</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Filter strip -->
+<div class="fn-filter">
+  <div class="wrap filter-row">
+    <div class="filter-group">
+      <span class="lab">지역</span>
+      <div class="pills">
+        <a class="pill region on">전체</a>
+        <a class="pill region">실리콘밸리</a>
+        <a class="pill region">보스턴</a>
+        <a class="pill region">베이징</a>
+        <a class="pill region">도쿄</a>
+        <a class="pill region">텔아비브</a>
+        <a class="pill region">방갈로르</a>
+        <a class="pill region">판교</a>
+        <a class="pill region">강남</a>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="lab">유형</span>
+      <div class="pills">
+        <a class="pill on">전체</a>
+        <a class="pill">긴급</a>
+        <a class="pill">모델</a>
+        <a class="pill">하드웨어</a>
+        <a class="pill">오픈소스</a>
+      </div>
+    </div>
+    <div class="filter-spacer"></div>
+    <div class="filter-meta">
+      <span class="live-dot">실시간 송고 중</span>
+      <span>총 12,438 노트 · 정렬: 최신순</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main timeline -->
+<section class="fn-main wrap">
+  <div class="timeline">
+
+    <!-- DAY: TODAY -->
+    <div class="day-header">
+      <div class="date-num">27</div>
+      <div class="date-meta">
+        <div class="month-year">APR · 2026 · MON</div>
+        <div class="day-title">오늘 <span class="count">+ 8 notes</span></div>
+      </div>
+    </div>
+
+    <article class="note urgent">
+      <div class="note-time">
+        <div class="t">14:42</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av c">JD</div>
+            <span class="nm">정도훈</span>
+            <span class="role">AI 안전성 연구자</span>
+          </div>
+          <span class="note-tag urgent">긴급</span>
+          <span class="note-loc">샌프란시스코 OpenAI 디스트릭트</span>
+        </div>
+        <div class="note-body">
+          <p>오늘 새벽 2시. GPT-5 출시 전 alignment 평가 결과가 임계점을 넘었다. Red team 검증 인력이 모자라 외부 협업으로 돌리고 있다. 지난주 추가한 evaluation harness는 닷새 안에 통과해야 한다. <strong>다음 주 출시까지 5일이 한계.</strong></p>
+          <p>그래도 어제는 두 가지 새 alignment 케이스를 발견했다. 이름은 아직 v0.3.1이다.</p>
+        </div>
+        <div class="stat-snap">
+          <div class="item"><div class="n">147</div><div class="l">평가 케이스 / 24h</div></div>
+          <div class="item"><div class="n">5일</div><div class="l">GPU 클러스터 가용</div></div>
+          <div class="item"><div class="n">2</div><div class="l">신규 fail case</div></div>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>✱ 알림 설정</a>
+          <a class="scrap">전체 보기 →</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">11:18</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av b">PH</div>
+            <span class="nm">박하늘</span>
+            <span class="role">로보틱스 연구자</span>
+          </div>
+          <span class="note-tag">현장</span>
+          <span class="note-loc">보스턴 다이내믹스 Lab 31</span>
+        </div>
+        <div class="note-body">
+          <p>Lab 31번이 다시 문을 열었다. GPU 클러스터 정전이 평균 11시간 → 4시간으로 단축. 박사과정 율리야가 처음으로 휴머노이드 보행 모델을 end-to-end로 학습시켰다고 한다. 7시간 만에 첫 손의 균형을 잡았다.</p>
+        </div>
+        <div class="polaroid-row">
+          <div class="note-polaroid">
+            <div class="img pat-3">
+              <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+                <rect width="240" height="180" fill="url(#grain)"/>
+                <g fill="rgba(201,138,43,0.7)">
+                  <rect x="40" y="100" width="30" height="60"/>
+                  <rect x="80" y="80" width="30" height="80"/>
+                  <rect x="120" y="90" width="30" height="70"/>
+                  <rect x="160" y="70" width="30" height="90"/>
+                </g>
+                <text x="50%" y="40%" text-anchor="middle" font-family="Noto Serif KR" font-size="16" font-weight="700" fill="rgba(255,255,255,0.85)">Lab 31</text>
+              </svg>
+            </div>
+            <div class="cap">Lab 31, 오후 4시</div>
+          </div>
+          <div class="note-polaroid r">
+            <div class="img pat-6">
+              <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+                <rect width="240" height="180" fill="url(#grain)"/>
+                <circle cx="120" cy="90" r="40" fill="rgba(255,255,255,0.2)"/>
+                <text x="50%" y="55%" text-anchor="middle" font-family="Noto Serif KR" font-size="20" font-weight="700" fill="rgba(255,255,255,0.85)">GPU #2</text>
+              </svg>
+            </div>
+            <div class="cap">새 H200 클러스터 두 대</div>
+          </div>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 12</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">09:33</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av d">MK</div>
+            <span class="nm">민가람</span>
+            <span class="role">테크 저널리스트</span>
+          </div>
+          <span class="note-tag water">인프라</span>
+          <span class="note-loc">방갈로르 데이터센터 클러스터</span>
+        </div>
+        <div class="note-body">
+          <p>AI 인프라 출장 17일째. 데이터센터 절반이 냉각 한계. 오늘 운영자 회의에서 결정된 것: 액침 냉각 시스템을 거점당 두 곳으로 늘릴 것. CapEx는 데이터센터당 320 lakh, 한국 돈으로 약 5억.</p>
+        </div>
+        <div class="quote-note">
+          <div class="q">"우리는 GPU 위에 산다고 생각해요. 코드 위가 아니라."</div>
+          <div class="src">— 방갈로르 인프라 엔지니어, 라피카 베굼(54)</div>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 28</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">07:51</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av">SY</div>
+            <span class="nm">심윤경</span>
+            <span class="role">반도체 산업 분석가</span>
+          </div>
+          <span class="note-tag">데이터</span>
+          <span class="note-loc">서울 / 원격 분석</span>
+        </div>
+        <div class="note-body">
+          <p>TSMC가 어제 공개한 1분기 출하 데이터. 이상한 패턴이 보인다. <strong>한국 팹리스에 대한 주문은 17% 늘었지만, 실제 출하는 4%만 증가</strong>. 어디에서 막혀 있는지 추적 중이다. 자세한 분석은 다음 주 리포트로.</p>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 41</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- DAY: YESTERDAY -->
+    <div class="day-header">
+      <div class="date-num">26</div>
+      <div class="date-meta">
+        <div class="month-year">APR · 2026 · SUN</div>
+        <div class="day-title">어제 <span class="count">+ 14 notes</span></div>
+      </div>
+    </div>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">22:14</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av e">YR</div>
+            <span class="nm">유리아</span>
+            <span class="role">도쿄 통신원</span>
+          </div>
+          <span class="note-tag">사용자 르포</span>
+          <span class="note-loc">도쿄 시부야 시니어 IT 카페</span>
+        </div>
+        <div class="note-body">
+          <p>ChatGPT 출시 3주년 행사를 다녀왔다. 86세 마사코 할머니는 지금 세 번째 모델을 쓰고 있다. 그래도 어제 처음으로 자작 시 한 편을 써냈다. "프롬프트를 입력하면 살아야 할 이유가 생겨." 이 한 마디가 오늘 일정의 전부.</p>
+        </div>
+        <div class="note-polaroid">
+          <div class="img pat-7">
+            <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+              <rect width="240" height="180" fill="url(#grain)"/>
+              <g fill="rgba(201,138,43,0.6)">
+                <rect x="60" y="80" width="120" height="80" fill="rgba(255,255,255,0.15)"/>
+                <rect x="70" y="90" width="100" height="3" fill="rgba(255,255,255,0.4)"/>
+                <rect x="70" y="100" width="80" height="3" fill="rgba(255,255,255,0.4)"/>
+                <rect x="70" y="110" width="90" height="3" fill="rgba(255,255,255,0.4)"/>
+              </g>
+              <text x="50%" y="40%" text-anchor="middle" font-family="Noto Serif KR" font-size="14" font-weight="500" fill="rgba(255,255,255,0.85)">마사코의 노트</text>
+            </svg>
+          </div>
+          <div class="cap">26/04 · 시부야</div>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 89</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">18:07</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av c">LJ</div>
+            <span class="nm">이주연</span>
+            <span class="role">동남아 테크 리서처</span>
+          </div>
+          <span class="note-tag kid">교육</span>
+          <span class="note-loc">미얀마 양곤 코딩 부트캠프</span>
+        </div>
+        <div class="note-body">
+          <p>양곤 코딩 부트캠프에서 음성 메모 한 통 보냅니다. 카렌족 청년들이 만든 한국어 학습 앱의 데모 발표. 멜로디 같은 키보드 소리만 들어주세요.</p>
+        </div>
+        <div class="voice-memo">
+          <div class="play"></div>
+          <div class="wave">
+            <span style="height:40%"></span><span style="height:65%"></span><span style="height:80%"></span>
+            <span style="height:55%"></span><span style="height:90%"></span><span style="height:70%"></span>
+            <span style="height:45%"></span><span style="height:60%"></span><span style="height:85%"></span>
+            <span style="height:50%"></span><span style="height:75%"></span><span style="height:60%"></span>
+            <span style="height:40%"></span><span style="height:80%"></span><span style="height:65%"></span>
+            <span style="height:55%"></span><span style="height:70%"></span><span style="height:45%"></span>
+            <span style="height:60%"></span><span style="height:80%"></span><span style="height:50%"></span>
+            <span style="height:35%"></span><span style="height:65%"></span><span style="height:55%"></span>
+          </div>
+          <div class="dur">0:42</div>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 134</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">14:55</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av">RS</div>
+            <span class="nm">류서원</span>
+            <span class="role">편집장</span>
+          </div>
+          <span class="note-tag">에디터 노트</span>
+          <span class="note-loc">서울 사무실</span>
+        </div>
+        <div class="note-body">
+          <p>이번 주 Field Notes에 모인 메모를 다시 읽으면서 든 생각. 우리는 "빌더"라는 말을 너무 자주 쓰는 것 같다. 실리콘밸리도 판교도 양곤도 누군가의 일상이다. <strong>빌더 너머라는 표현 대신, 그곳의 책상·터미널·언어로 들어가는 글을 더 쓰자.</strong></p>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 56</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">10:22</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av c">JD</div>
+            <span class="nm">정도훈</span>
+            <span class="role">AI 안전성 연구자</span>
+          </div>
+          <span class="note-tag med">연구</span>
+          <span class="note-loc">보스턴 alignment lab</span>
+        </div>
+        <div class="note-body">
+          <p>한국에서 합류한 AI 엔지니어 12인이 어제 보스턴에 합류. 첫날 진행 상황: PR 78건, 코드 리뷰 14건, 새 평가 셋 23개. 김지현 엔지니어가 도착하자마자 새 attention 패턴을 발견했다. 모델도 사람도 흥분 상태.</p>
+        </div>
+        <div class="stat-snap">
+          <div class="item"><div class="n">78</div><div class="l">PR</div></div>
+          <div class="item"><div class="n">14</div><div class="l">리뷰</div></div>
+          <div class="item"><div class="n">+1</div><div class="l">신규 패턴</div></div>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 76</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- DAY: 25 -->
+    <div class="day-header">
+      <div class="date-num">25</div>
+      <div class="date-meta">
+        <div class="month-year">APR · 2026 · SAT</div>
+        <div class="day-title">이틀 전 <span class="count">+ 11 notes</span></div>
+      </div>
+    </div>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">19:48</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av d">KS</div>
+            <span class="nm">김선화</span>
+            <span class="role">남아공 테크 리포터</span>
+          </div>
+          <span class="note-tag water">인프라</span>
+          <span class="note-loc">케이프타운 데이터센터</span>
+        </div>
+        <div class="note-body">
+          <p>오늘 케이프타운에 첫 GPU 클러스터 가동이 시작됐다. 마을 사람들이 모두 모여 박수를 쳤다. 16세 마리암이 처음으로 4시간이 아닌 15분 만에 모델 추론을 마쳤다. 그 시간을 어디에 쓸 거냐고 물었더니 — "공부."</p>
+        </div>
+        <div class="quote-note">
+          <div class="q">"내 동생들한테 코드를 가르쳐줄 수 있어요. 처음으로요."</div>
+          <div class="src">— 마리암(16), 케이프타운 청년 코더</div>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 218</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">15:30</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av b">PH</div>
+            <span class="nm">박하늘</span>
+            <span class="role">로보틱스 연구자</span>
+          </div>
+          <span class="note-tag food">엔지니어링</span>
+          <span class="note-loc">보스턴 8번 빌딩 CI 시스템</span>
+        </div>
+        <div class="note-body">
+          <p>오늘 빌드 시간이 어제의 70%. 인프라 본부에서 다음 주 정상화 약속을 받았다. 그동안 critical PR을 우선 분류해서 메인 브랜치로 머지할 예정. 자원봉사 7명이 새로 합류해서 가능해졌다.</p>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 33</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="note">
+      <div class="note-time">
+        <div class="t">11:09</div>
+        <div class="tz">KST</div>
+      </div>
+      <div class="note-card">
+        <div class="note-meta">
+          <div class="note-author">
+            <div class="av">CH</div>
+            <span class="nm">최희정</span>
+            <span class="role">국내 테크 리포터</span>
+          </div>
+          <span class="note-tag">국내</span>
+          <span class="note-loc">서울 강남 코딩 부트캠프</span>
+        </div>
+        <div class="note-body">
+          <p>강남 코딩 부트캠프, 폐업 위기 점검을 시작했다. 119곳 중 32곳이 강사 부족 상태. 작년 폐업한 두 곳이 모두 이 32곳 안에 있었다. 오늘 안에 우선 지원 명단을 정리한다.</p>
+        </div>
+        <div class="note-actions">
+          <a>+ 스크랩</a>
+          <a>↗ 공유</a>
+          <a>♡ 89</a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="fn-side">
+    <div class="urgent-card">
+      <div class="label">진행 중인 긴급 상황</div>
+      <h4>GPT-5 출시 5일 전, alignment 임계점</h4>
+      <p>출시 일정이 늦어지면 한국 빌더 생태계도 일정을 다시 짜야 합니다. 정도훈 alignment 리서처가 매시간 업데이트 중.</p>
+      <a class="btn">실시간 트래커 →</a>
+    </div>
+
+    <div class="side-block">
+      <h3>지금 송고 거점</h3>
+      <ul class="region-list">
+        <li><span class="heat h"></span><span class="nm">실리콘밸리</span><span class="ct">+8</span></li>
+        <li><span class="heat h"></span><span class="nm">보스턴</span><span class="ct">+6</span></li>
+        <li><span class="heat m"></span><span class="nm">방갈로르</span><span class="ct">+4</span></li>
+        <li><span class="heat m"></span><span class="nm">양곤</span><span class="ct">+3</span></li>
+        <li><span class="heat m"></span><span class="nm">케이프타운</span><span class="ct">+3</span></li>
+        <li><span class="heat l"></span><span class="nm">도쿄</span><span class="ct">+2</span></li>
+        <li><span class="heat l"></span><span class="nm">텔아비브</span><span class="ct">+2</span></li>
+        <li><span class="heat l"></span><span class="nm">서울 강남</span><span class="ct">+1</span></li>
+      </ul>
+    </div>
+
+    <div class="side-block">
+      <h3>지금 활동 중인 통신원</h3>
+      <div class="author-side">
+        <div class="it">
+          <div class="av c">JD</div>
+          <div class="info">
+            <div class="nm">정도훈</div>
+            <div class="last">26분 전 송고 · SF</div>
+          </div>
+          <span class="live-tag">LIVE</span>
+        </div>
+        <div class="it">
+          <div class="av b">PH</div>
+          <div class="info">
+            <div class="nm">박하늘</div>
+            <div class="last">3시간 전 · 보스턴</div>
+          </div>
+          <span class="live-tag">LIVE</span>
+        </div>
+        <div class="it">
+          <div class="av d">MK</div>
+          <div class="info">
+            <div class="nm">민가람</div>
+            <div class="last">5시간 전 · 방갈로르</div>
+          </div>
+        </div>
+        <div class="it">
+          <div class="av">SY</div>
+          <div class="info">
+            <div class="nm">심윤경</div>
+            <div class="last">7시간 전 · 서울</div>
+          </div>
+        </div>
+        <div class="it">
+          <div class="av c">LJ</div>
+          <div class="info">
+            <div class="nm">이주연</div>
+            <div class="last">어제 · 양곤</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-block glossary">
+      <h3>기술 용어 사전</h3>
+      <p><strong>ICLR</strong>국제머신러닝학회. 매년 봄 열리는 AI 분야의 가장 큰 학회 중 하나.</p>
+      <p><strong>HumanEval</strong>AI 코딩 모델의 표준 평가 셋. 164개 프로그래밍 문제 풀이 정답률.</p>
+      <p><strong>RAG</strong>Retrieval Augmented Generation. 외부 문서를 검색해서 답하는 LLM 방식.</p>
+      <p><strong>MLOps</strong>머신러닝 모델의 학습·배포·운영을 책임지는 엔지니어링 팀.</p>
+    </div>
+  </aside>
+</section>
+
+<!-- Submit CTA -->
+<section class="fn-submit">
+  <div class="wrap submit-grid">
+    <div>
+      <h2>당신의 빌더 메모도, <em>한 줄로 충분합니다.</em></h2>
+      <p>엔지니어, 연구자, 디자이너, 그리고 빌딩하는 누구든. 짧은 메모 한 줄, 사진 한 장, 음성 메모 30초가 누군가에게는 가장 정확한 정보가 됩니다. 검토 후 등록되며, 익명 송고도 가능합니다.</p>
+    </div>
+    <div class="submit-card">
+      <h4>빌더 메모 보내기</h4>
+      <div class="row-input">
+        <label>위치</label>
+        <input type="text" placeholder="예: 판교 / 실리콘밸리" />
+      </div>
+      <div class="row-input">
+        <label>메모</label>
+        <textarea placeholder="짧게, 본 그대로."></textarea>
+      </div>
+      <button>송고하기 →</button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <div class="ft-brand">humanaid</div>
+        <div class="ft-tag">사람과 AI, 디지털을 잇는 기술 매거진.</div>
+        <a href="tel:0269254867" class="ft-phone">02-6925-4867</a>
+        <div class="ft-time">10:00–18:00 (주말·공휴일 제외)</div>
+        <a href="mailto:hello@humanaid.digital" style="color:rgba(255,255,255,.65); margin-top:12px; display:inline-block;">hello@humanaid.digital</a>
+      </div>
+      <div>
+        <h5>서비스</h5>
+        <a href="humanaid.html">매거진</a>
+        <a href="field-notes.html">필드 노트</a>
+        <a href="#">데이터룸</a>
+        <a href="#">컬렉션</a>
+        <a href="#">물어봐 AI</a>
+      </div>
+      <div>
+        <h5>humanaid</h5>
+        <a href="#">소개</a>
+        <a href="#">작가 지원</a>
+        <a href="#">파트너 제휴</a>
+        <a href="#">콘텐츠 제안</a>
+      </div>
+      <div>
+        <h5>구독·앱</h5>
+        <a href="#">뉴스레터</a>
+        <a href="#">크롬 확장 프로그램</a>
+        <a href="#">슬랙 봇 설치</a>
+        <a href="#">RSS</a>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <div class="legal">
+        <a href="#" class="bold">이용약관</a>
+        <a href="#" class="bold">개인정보 처리방침</a>
+        <a href="#">청소년보호정책</a>
+        <a href="#">윤리강령</a>
+        <a href="#">데이터 보안 가이드</a>
+      </div>
+      <div class="ft-corp">
+        <p>(주)휴머네이드 · 대표이사 김지현</p>
+        <p>서울특별시 종로구 사직로 123, 5층</p>
+        <p>사업자등록번호 : 123-45-67890 · 인터넷신문등록번호 : 서울,아54129</p>
+        <p>제호 : humanaid · 발행인 김지현 · 편집인 류서원</p>
+        <p>등록일 : 2024년 03월 15일 · 발행일 : 2024년 04월 01일</p>
+        <div class="ft-copy">© 2024–2026 humanaid Inc. All rights reserved.</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

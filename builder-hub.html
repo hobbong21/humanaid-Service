@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Builder Hub — 빌더의 커뮤니티, humanaid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F4;
+    --ink: #111111;
+    --ink-soft: #555555;
+    --ink-mute: #9A9A9A;
+    --line: #ECECEC;
+    --line-strong: #DCDCDC;
+    --terra: #B8412A;
+    --terra-deep: #8E2F1E;
+    --forest: #1F3A2E;
+    --ochre: #C98A2B;
+    --serif: 'Noto Serif KR', serif;
+    --serif-kr: 'Noto Serif KR', serif;
+    --sans: 'Noto Sans KR', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--terra); color: #fff; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- Util bar (shared) ---------- */
+  .util { background: var(--surface); color: var(--ink-soft); font-size: 12px; border-bottom: 1px solid var(--line); }
+  .util .row { display: flex; justify-content: space-between; align-items: center; height: 38px; }
+  .util a { color: var(--ink-soft); transition: color .15s; }
+  .util a:hover { color: var(--terra); }
+  .util .left { display: flex; gap: 22px; align-items: center; }
+  .util .left a { position: relative; }
+  .util .left a:first-child { font-weight: 600; color: var(--ink); font-size: 12.5px; }
+  .util .left a:first-child::after { content: ""; position: absolute; right: -12px; top: 50%; width: 1px; height: 11px; background: var(--line-strong); transform: translateY(-50%); }
+  .util .left a.active-util { color: var(--terra); font-weight: 600; }
+  .util .right { display: flex; gap: 22px; }
+
+  /* ---------- Main header (shared) ---------- */
+  header.main { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 50; }
+  header.main .row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; height: 78px; gap: 48px; }
+  .logo { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: -0.03em; color: var(--ink); display: flex; align-items: baseline; gap: 4px; }
+  .logo .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--terra); display: inline-block; transform: translateY(-2px); margin-left: 2px; }
+  nav.primary { display: flex; gap: 30px; }
+  nav.primary a { font-size: 14.5px; font-weight: 500; color: var(--ink); padding: 6px 0; position: relative; transition: color .15s; }
+  nav.primary a:hover { color: var(--terra); }
+  nav.primary a.active { color: var(--terra); font-weight: 600; }
+  nav.primary a.active::after { content: ""; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: var(--terra); }
+  .header-right { display: flex; align-items: center; gap: 18px; }
+  .header-right .ad { font-size: 13px; color: var(--ink-soft); font-weight: 500; padding: 7px 13px; border: 1px solid var(--line-strong); border-radius: 999px; }
+  .header-right .author, .header-right .login { font-size: 14px; color: var(--ink-soft); font-weight: 500; }
+  .header-right .signup { font-size: 14px; font-weight: 600; background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 4px; }
+  .header-right .signup:hover { background: var(--terra); }
+
+  /* ============================================
+     BUILDER HUB SPECIFIC
+     ============================================ */
+
+  /* ---------- Hero ---------- */
+  .bh-hero {
+    background: var(--ink);
+    color: #fff;
+    padding: 96px 0 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bh-hero::before {
+    content: ""; position: absolute;
+    top: -120px; right: -120px; width: 480px; height: 480px;
+    background: radial-gradient(circle, var(--terra) 0%, transparent 65%);
+    opacity: .35; filter: blur(60px);
+  }
+  .bh-hero::after {
+    content: ""; position: absolute;
+    bottom: -80px; left: 30%; width: 360px; height: 360px;
+    background: radial-gradient(circle, var(--ochre) 0%, transparent 60%);
+    opacity: .22; filter: blur(50px);
+  }
+  .bh-hero .wrap { position: relative; z-index: 2; }
+  .bh-kicker {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ochre); font-weight: 500;
+    letter-spacing: .16em; text-transform: uppercase;
+    margin-bottom: 28px;
+    padding: 6px 14px; border: 1px solid rgba(201,138,43,.4);
+    border-radius: 999px;
+  }
+  .bh-kicker::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ochre);
+  }
+  .bh-hero h1 {
+    font-family: var(--serif-kr); font-weight: 700;
+    font-size: 64px; line-height: 1.18;
+    letter-spacing: -0.04em;
+    margin: 0 0 28px;
+    max-width: 820px;
+  }
+  .bh-hero h1 em { font-style: normal; color: var(--ochre); }
+  .bh-hero h1 .underline {
+    background: linear-gradient(180deg, transparent 78%, var(--terra) 78%);
+    padding: 0 4px;
+  }
+  .bh-hero .lede {
+    font-family: var(--serif-kr);
+    font-size: 18px; line-height: 1.75;
+    color: rgba(255,255,255,.78);
+    max-width: 640px; margin: 0 0 48px;
+  }
+  .bh-hero-row {
+    display: flex; align-items: center;
+    gap: 24px; flex-wrap: wrap;
+  }
+  .apply-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--terra); color: #fff;
+    padding: 16px 28px;
+    font-size: 15px; font-weight: 600;
+    border-radius: 4px;
+    transition: background .15s;
+  }
+  .apply-btn:hover { background: var(--terra-deep); }
+  .apply-btn::after { content: "→"; font-size: 18px; }
+  .secondary-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,.85);
+    font-family: var(--mono); font-size: 12px;
+    font-weight: 500; letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,.3);
+  }
+  .secondary-btn:hover { color: var(--ochre); border-color: var(--ochre); }
+
+  /* ---------- Stats strip ---------- */
+  .bh-stats {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 36px 0;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .stat-cell {
+    padding: 0 32px;
+    border-right: 1px solid var(--line);
+  }
+  .stat-cell:first-child { padding-left: 0; }
+  .stat-cell:last-child { border-right: 0; padding-right: 0; }
+  .stat-cell .n {
+    font-family: var(--serif); font-size: 44px;
+    font-weight: 700; color: var(--ink);
+    letter-spacing: -0.04em; line-height: 1;
+    margin-bottom: 8px;
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .stat-cell .n .small {
+    font-size: 18px; color: var(--terra);
+    font-weight: 600;
+  }
+  .stat-cell .l {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+
+  /* ---------- Section base ---------- */
+  .bh-section { padding: 80px 0; }
+  .bh-section.alt { background: var(--surface-2); }
+  .section-h {
+    margin-bottom: 48px;
+    display: flex; align-items: end; justify-content: space-between;
+    gap: 40px; flex-wrap: wrap;
+  }
+  .section-h .left { max-width: 640px; }
+  .section-h .kicker {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--terra); font-weight: 500;
+    letter-spacing: .14em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-h .kicker::before {
+    content: ""; width: 22px; height: 1px; background: var(--terra);
+  }
+  .section-h h2 {
+    font-family: var(--serif-kr); font-size: 38px;
+    font-weight: 700; margin: 0 0 14px;
+    letter-spacing: -0.03em; line-height: 1.3;
+  }
+  .section-h h2 em {
+    font-style: normal; color: var(--terra);
+  }
+  .section-h .desc {
+    font-size: 15px; color: var(--ink-soft);
+    line-height: 1.75;
+  }
+  .section-h .more {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--ink-soft); font-weight: 500;
+    text-transform: uppercase; letter-spacing: .1em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .section-h .more:hover { color: var(--terra); border-color: var(--terra); }
+
+  /* ---------- Benefits grid ---------- */
+  .benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .benefit-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 32px 28px;
+    transition: all .2s;
+    position: relative;
+  }
+  .benefit-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  }
+  .benefit-card .ico {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--terra);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 22px; font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .benefit-card .num {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); font-weight: 500;
+    letter-spacing: .1em; margin-bottom: 8px;
+  }
+  .benefit-card h4 {
+    font-family: var(--serif-kr); font-size: 19px;
+    font-weight: 700; margin: 0 0 12px;
+    letter-spacing: -0.02em; line-height: 1.4;
+  }
+  .benefit-card p {
+    font-size: 14px; color: var(--ink-soft);
+    line-height: 1.7; margin: 0;
+  }
+  .benefit-card .tag {
+    display: inline-block;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--ochre); font-weight: 600;
+    background: rgba(201,138,43,.1);
+    padding: 3px 8px; border-radius: 3px;
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-top: 16px;
+  }
+
+  /* ---------- Featured Builders ---------- */
+  .builder-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .builder-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all .2s;
+  }
+  .builder-card:hover {
+    border-color: var(--line-strong);
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  }
+  .builder-portrait {
+    aspect-ratio: 4/3;
+    background: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+  .builder-portrait svg { width: 100%; height: 100%; display: block; }
+  .builder-portrait .pill {
+    position: absolute; top: 14px; left: 14px;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--ochre); font-weight: 600;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(4px);
+    padding: 4px 9px; border-radius: 999px;
+    letter-spacing: .08em; text-transform: uppercase;
+  }
+  .builder-info {
+    padding: 22px 22px 24px;
+  }
+  .builder-info .nm {
+    font-family: var(--serif-kr); font-size: 18px;
+    font-weight: 700; margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+  .builder-info .role {
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .builder-info .bio {
+    font-size: 13.5px; line-height: 1.65;
+    color: var(--ink); margin: 0 0 14px;
+  }
+  .builder-info .links {
+    display: flex; gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .builder-info .links a {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); font-weight: 500;
+    letter-spacing: .04em;
+  }
+  .builder-info .links a:hover { color: var(--terra); }
+
+  /* ---------- Programs ---------- */
+  .prog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+  .prog-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 38px 36px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .prog-card .num-big {
+    font-family: var(--serif); font-size: 64px;
+    font-weight: 700; color: var(--terra);
+    letter-spacing: -0.05em; line-height: 1;
+    grid-row: span 2;
+  }
+  .prog-card .head {
+    margin-bottom: 14px;
+  }
+  .prog-card .meta-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--terra); font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .prog-card .meta-tag .deadline {
+    color: var(--ochre);
+    border-left: 1px solid var(--line-strong);
+    padding-left: 8px; margin-left: 4px;
+  }
+  .prog-card h3 {
+    font-family: var(--serif-kr); font-size: 24px;
+    font-weight: 700; margin: 0;
+    letter-spacing: -0.025em; line-height: 1.35;
+  }
+  .prog-card .body p {
+    font-size: 14.5px; line-height: 1.7;
+    color: var(--ink-soft); margin: 0 0 18px;
+  }
+  .prog-card .features {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 22px;
+  }
+  .prog-card .features span {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink); font-weight: 500;
+    background: var(--surface-2);
+    padding: 4px 10px; border-radius: 999px;
+    letter-spacing: .04em;
+  }
+  .prog-card .apply {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11.5px;
+    color: var(--terra); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .1em;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--terra);
+  }
+
+  /* ---------- Events ---------- */
+  .event-list {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .event-row {
+    display: grid;
+    grid-template-columns: 110px 1fr auto auto;
+    gap: 32px;
+    align-items: center;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--line);
+    transition: background .15s;
+    cursor: pointer;
+  }
+  .event-row:last-child { border-bottom: 0; }
+  .event-row:hover { background: var(--surface-2); }
+  .event-date {
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .event-date .month {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--terra); font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+  }
+  .event-date .day {
+    font-family: var(--serif); font-size: 36px;
+    font-weight: 700; color: var(--ink);
+    letter-spacing: -0.04em; line-height: 1.1;
+  }
+  .event-date .year {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--ink-mute); letter-spacing: .1em;
+  }
+  .event-info h4 {
+    font-family: var(--serif-kr); font-size: 18px;
+    font-weight: 700; margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .event-info .meta {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--ink-soft);
+    flex-wrap: wrap;
+  }
+  .event-info .meta .dot { color: var(--ink-mute); }
+  .event-tag {
+    font-family: var(--mono); font-size: 10px;
+    font-weight: 600; padding: 4px 10px;
+    border-radius: 999px; letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .event-tag.demo { background: rgba(184,65,42,.1); color: var(--terra); }
+  .event-tag.meetup { background: rgba(31,58,46,.1); color: var(--forest); }
+  .event-tag.hack { background: rgba(201,138,43,.12); color: var(--ochre); }
+  .event-tag.workshop { background: var(--surface-2); color: var(--ink-soft); }
+  .event-cta {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink); font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: 7px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+  }
+  .event-cta:hover {
+    background: var(--ink); color: #fff; border-color: var(--ink);
+  }
+  .event-cta.live {
+    background: var(--terra); color: #fff; border-color: var(--terra);
+  }
+
+  /* ---------- Jobs ---------- */
+  .jobs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .job-card {
+    padding: 24px 28px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    gap: 12px;
+    transition: background .15s;
+    cursor: pointer;
+  }
+  .job-card:nth-child(2n) { border-right: 0; }
+  .job-card:nth-last-child(-n+2) { border-bottom: 0; }
+  .job-card:hover { background: var(--surface-2); }
+  .job-top {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .job-logo {
+    width: 36px; height: 36px;
+    border-radius: 6px;
+    background: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .job-logo.t { background: var(--terra); }
+  .job-logo.f { background: var(--forest); }
+  .job-logo.o { background: var(--ochre); color: var(--ink); }
+  .job-co {
+    font-size: 13px; font-weight: 600; color: var(--ink);
+  }
+  .job-co .loc {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); font-weight: 500;
+    margin-left: 8px; letter-spacing: .04em;
+  }
+  .job-card h4 {
+    font-family: var(--serif-kr); font-size: 17px;
+    font-weight: 700; margin: 0;
+    letter-spacing: -0.02em; line-height: 1.4;
+  }
+  .job-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .job-tags span {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-soft); font-weight: 500;
+    background: var(--surface-2);
+    padding: 3px 8px; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .job-tags span.hot {
+    background: var(--terra); color: #fff;
+  }
+  .job-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: auto; padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute); letter-spacing: .04em;
+  }
+  .job-bottom .salary { color: var(--terra); font-weight: 600; }
+
+  /* ---------- Showcase ---------- */
+  .show-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+  .show-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    transition: all .2s;
+  }
+  .show-card:hover {
+    border-color: var(--line-strong);
+    box-shadow: 0 8px 24px rgba(0,0,0,.05);
+  }
+  .show-thumb {
+    aspect-ratio: 4/3;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .show-thumb svg { width: 100%; height: 100%; display: block; }
+  .show-info .stack {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-mute); font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .show-info h4 {
+    font-family: var(--serif-kr); font-size: 19px;
+    font-weight: 700; margin: 0 0 10px;
+    letter-spacing: -0.02em; line-height: 1.4;
+  }
+  .show-info p {
+    font-size: 13.5px; line-height: 1.65;
+    color: var(--ink-soft); margin: 0 0 14px;
+  }
+  .show-meta {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--ink-mute);
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+  .show-meta .star { color: var(--ochre); font-weight: 600; }
+  .show-meta .by { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Apply CTA ---------- */
+  .bh-apply {
+    background: var(--ink);
+    color: #fff;
+    padding: 96px 0;
+    position: relative; overflow: hidden;
+  }
+  .bh-apply::before {
+    content: ""; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--terra), var(--ochre), var(--terra));
+  }
+  .apply-grid {
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 64px; align-items: center;
+  }
+  .bh-apply h2 {
+    font-family: var(--serif-kr); font-size: 44px;
+    font-weight: 700; margin: 0 0 22px;
+    letter-spacing: -0.035em; line-height: 1.25;
+  }
+  .bh-apply h2 em { font-style: normal; color: var(--ochre); }
+  .bh-apply .lede {
+    font-family: var(--serif-kr);
+    font-size: 17px; line-height: 1.75;
+    color: rgba(255,255,255,.7);
+    margin: 0 0 32px; max-width: 540px;
+  }
+  .apply-checks {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .apply-checks li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: rgba(255,255,255,.85);
+  }
+  .apply-checks li::before {
+    content: "✓"; color: var(--ochre);
+    font-weight: 700; font-size: 14px;
+  }
+  .apply-form {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    padding: 36px;
+    backdrop-filter: blur(10px);
+  }
+  .apply-form h4 {
+    font-family: var(--serif-kr); font-size: 19px;
+    font-weight: 700; margin: 0 0 20px;
+    color: #fff;
+  }
+  .apply-form .field {
+    margin-bottom: 16px;
+  }
+  .apply-form label {
+    display: block;
+    font-family: var(--mono); font-size: 10.5px;
+    color: rgba(255,255,255,.55);
+    letter-spacing: .12em; text-transform: uppercase;
+    margin-bottom: 6px; font-weight: 500;
+  }
+  .apply-form input, .apply-form select, .apply-form textarea {
+    width: 100%;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    color: #fff; font-family: var(--sans);
+    padding: 11px 14px; font-size: 14px;
+    border-radius: 4px; outline: none;
+    transition: border-color .15s;
+  }
+  .apply-form input:focus, .apply-form select:focus, .apply-form textarea:focus {
+    border-color: var(--ochre);
+  }
+  .apply-form textarea { min-height: 64px; resize: vertical; line-height: 1.5; }
+  .apply-form button {
+    width: 100%;
+    background: var(--terra); color: #fff;
+    border: none; padding: 14px;
+    font-family: var(--sans); font-size: 14px; font-weight: 700;
+    border-radius: 4px; cursor: pointer;
+    margin-top: 6px;
+    transition: background .15s;
+  }
+  .apply-form button:hover { background: var(--terra-deep); }
+
+  /* ---------- Footer (shared) ---------- */
+  footer { background: var(--ink); color: rgba(255,255,255,.7); padding: 64px 0 32px; font-size: 13px; line-height: 1.75; border-top: 1px solid rgba(255,255,255,.08); }
+  .ft-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 56px; }
+  .ft-grid h5 { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .14em; margin: 0 0 18px; font-family: var(--mono); }
+  .ft-grid a { display: block; padding: 4px 0; color: rgba(255,255,255,.7); transition: color .15s; }
+  .ft-grid a:hover { color: var(--ochre); }
+  .ft-brand { font-family: var(--serif); font-size: 26px; color: #fff; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.03em; }
+  .ft-tag { font-family: var(--serif-kr); color: rgba(255,255,255,.85); font-size: 14px; line-height: 1.7; margin-bottom: 22px; font-weight: 500; }
+  .ft-phone { color: var(--ochre); font-size: 18px; font-weight: 600; font-family: var(--mono); margin-bottom: 4px; display: block; }
+  .ft-time { font-size: 12px; color: rgba(255,255,255,.5); }
+  .ft-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 28px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 24px; }
+  .ft-bottom .legal { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; }
+  .ft-bottom .legal a { color: rgba(255,255,255,.6); }
+  .ft-bottom .legal a.bold { font-weight: 500; color: rgba(255,255,255,.85); }
+  .ft-corp { font-size: 12px; color: rgba(255,255,255,.45); line-height: 1.75; }
+  .ft-corp p { margin: 4px 0; }
+  .ft-copy { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.4); margin-top: 22px; letter-spacing: .04em; }
+
+  /* Generative thumbnail patterns */
+  .pat-1 { background: linear-gradient(135deg, #1F3A2E 0%, #B8412A 100%); }
+  .pat-2 { background: linear-gradient(160deg, #C98A2B 0%, #8E2F1E 100%); }
+  .pat-3 { background: linear-gradient(135deg, #1A1A1A 0%, #1F3A2E 100%); }
+  .pat-4 { background: linear-gradient(135deg, #B8412A 0%, #C98A2B 100%); }
+  .pat-5 { background: linear-gradient(135deg, #1F3A2E 0%, #1A1A1A 100%); }
+  .pat-6 { background: linear-gradient(135deg, #C98A2B 0%, #1F3A2E 100%); }
+  .pat-7 { background: linear-gradient(160deg, #8E2F1E 0%, #1A1A1A 100%); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1080px) {
+    .bh-hero h1 { font-size: 48px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 24px 0; }
+    .stat-cell { padding: 0 24px; }
+    .stat-cell:nth-child(2n) { border-right: 0; }
+    .stat-cell:nth-child(odd) { padding-left: 0; }
+    .benefit-grid { grid-template-columns: 1fr 1fr; }
+    .builder-grid { grid-template-columns: 1fr 1fr; }
+    .prog-grid, .show-grid, .jobs-grid { grid-template-columns: 1fr; }
+    .job-card { border-right: 0; }
+    .job-card:nth-last-child(2) { border-bottom: 1px solid var(--line); }
+    .apply-grid { grid-template-columns: 1fr; gap: 36px; }
+    .section-h h2 { font-size: 30px; }
+  }
+  @media (max-width: 720px) {
+    .wrap { padding: 0 18px; }
+    nav.primary { display: none; }
+    .bh-hero { padding: 64px 0 48px; }
+    .bh-hero h1 { font-size: 34px; }
+    .benefit-grid, .builder-grid { grid-template-columns: 1fr; }
+    .event-row { grid-template-columns: 80px 1fr; gap: 18px; padding: 18px; }
+    .event-tag, .event-cta { display: none; }
+    .show-card { grid-template-columns: 1fr; }
+    .ft-grid { grid-template-columns: 1fr 1fr; }
+    .apply-checks { grid-template-columns: 1fr; }
+    .bh-apply h2 { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100">
+      <rect width="100" height="100" fill="transparent"/>
+      <circle cx="20" cy="30" r="0.5" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="60" cy="80" r="0.4" fill="rgba(255,255,255,0.2)"/>
+      <circle cx="80" cy="20" r="0.6" fill="rgba(255,255,255,0.3)"/>
+      <circle cx="40" cy="60" r="0.3" fill="rgba(255,255,255,0.2)"/>
+    </pattern>
+  </defs>
+</svg>
+
+<!-- Util bar -->
+<div class="util">
+  <div class="wrap row">
+    <div class="left">
+      <a href="humanaid.html">humanaid</a>
+      <a href="field-notes.html">Field Notes</a>
+      <a href="builder-hub.html" class="active-util">Builder Hub</a>
+    </div>
+    <div class="right">
+      <a href="#">매거진 RSS</a>
+      <a href="#">English</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main header -->
+<header class="main">
+  <div class="wrap row">
+    <a href="humanaid.html" class="logo">humanaid<span class="dot"></span></a>
+    <nav class="primary">
+      <a href="humanaid.html">매거진</a>
+      <a href="field-notes.html">필드 노트</a>
+      <a href="#">빌더 작가들</a>
+      <a href="#">컬렉션</a>
+      <a href="#">물어봐 AI</a>
+      <a href="#">데이터룸</a>
+    </nav>
+    <div class="header-right">
+      <a href="#" class="ad">파트너 제휴</a>
+      <a href="#" class="author">작가 지원</a>
+      <a href="#" class="login">로그인</a>
+      <a href="#" class="signup">회원가입</a>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="bh-hero">
+  <div class="wrap">
+    <div class="bh-kicker">Builder Hub · 멤버십</div>
+    <h1>당신이 만든 것이 <em>다음 글이 됩니다.</em><br><span class="underline">빌더의 코드와 질문</span>이 모이는 곳.</h1>
+    <p class="lede">humanaid Builder Hub는 무언가를 만드는 사람들의 커뮤니티입니다. 첫 사이드 프로젝트, 첫 오픈소스 PR, 첫 스타트업 — 무엇이든 환영합니다. 혼자 만들지 않아도 되는 자리가 여기에 있습니다.</p>
+    <div class="bh-hero-row">
+      <a href="#apply" class="apply-btn">멤버십 신청하기</a>
+      <a href="#programs" class="secondary-btn">프로그램 둘러보기 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="bh-stats">
+  <div class="wrap stats-grid">
+    <div class="stat-cell">
+      <div class="n">1,247<span class="small">명</span></div>
+      <div class="l">활성 빌더 멤버</div>
+    </div>
+    <div class="stat-cell">
+      <div class="n">380<span class="small">개</span></div>
+      <div class="l">진행 중인 빌더 프로젝트</div>
+    </div>
+    <div class="stat-cell">
+      <div class="n">47<span class="small">개</span></div>
+      <div class="l">올해 지원된 사이드 프로젝트</div>
+    </div>
+    <div class="stat-cell">
+      <div class="n">38<span class="small">명</span></div>
+      <div class="l">매칭 가능한 멘토</div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits -->
+<section class="bh-section">
+  <div class="wrap">
+    <div class="section-h">
+      <div class="left">
+        <div class="kicker">Membership · 멤버십 혜택</div>
+        <h2>혼자 만들기 어려울 때, <em>이런 것들이 따라옵니다.</em></h2>
+        <p class="desc">멤버십은 무료로 시작할 수 있고, 적극 활동하는 빌더는 Pro 등급으로 자동 전환됩니다. 모든 혜택은 신청서 검토 후 24시간 안에 활성화됩니다.</p>
+      </div>
+      <a href="#" class="more">전체 혜택 비교 →</a>
+    </div>
+    <div class="benefit-grid">
+      <div class="benefit-card">
+        <div class="ico">¶</div>
+        <div class="num">BENEFIT · 01</div>
+        <h4>비공개 슬랙 커뮤니티</h4>
+        <p>판교, 실리콘밸리, 도쿄, 보스턴까지. 시간대별 채널과 분야별 채널 23개. AMA(Ask Me Anything) 격주 진행.</p>
+        <span class="tag">즉시 입장</span>
+      </div>
+      <div class="benefit-card">
+        <div class="ico">⌖</div>
+        <div class="num">BENEFIT · 02</div>
+        <h4>큐레이션 빌더 메일</h4>
+        <p>매주 금요일 아침, 편집자가 직접 고른 5개의 기술 인사이트와 빌더 인터뷰 한 편. 멤버 전용 디테일 포함.</p>
+        <span class="tag">매주 금</span>
+      </div>
+      <div class="benefit-card">
+        <div class="ico">∞</div>
+        <div class="num">BENEFIT · 03</div>
+        <h4>멘토 1:1 매칭</h4>
+        <p>매분기마다 한 번, 등록된 38명의 시니어 멘토 중 한 명과 60분 세션. 분야는 자유 (커리어/기술/제품/경영).</p>
+        <span class="tag">분기별 1회</span>
+      </div>
+      <div class="benefit-card">
+        <div class="ico">$</div>
+        <div class="num">BENEFIT · 04</div>
+        <h4>빌더 디스카운트</h4>
+        <p>Cursor, Linear, Vercel, Notion, Figma 등 50+개 도구의 멤버 전용 할인 코드. 평균 30% 할인.</p>
+        <span class="tag">50+ 파트너</span>
+      </div>
+      <div class="benefit-card">
+        <div class="ico">⚡</div>
+        <div class="num">BENEFIT · 05</div>
+        <h4>월간 AI 크레딧</h4>
+        <p>OpenAI, Anthropic, Google API 크레딧을 매달 $50 상당으로 제공. Pro 등급은 $200까지.</p>
+        <span class="tag">매달 갱신</span>
+      </div>
+      <div class="benefit-card">
+        <div class="ico">◎</div>
+        <div class="num">BENEFIT · 06</div>
+        <h4>오프라인 빌더 미팅업</h4>
+        <p>매달 마지막 주 목요일, 판교/강남 장소를 번갈아 가며 진행. 데모 데이, 코드 리뷰 살롱, 비공개 토크.</p>
+        <span class="tag">월 1회</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Builders -->
+<section class="bh-section alt">
+  <div class="wrap">
+    <div class="section-h">
+      <div class="left">
+        <div class="kicker">Featured · 이번 달 빌더</div>
+        <h2>이번 달, <em>지금 만들고 있는 사람들.</em></h2>
+        <p class="desc">매달 humanaid 데스크가 인터뷰하는 다섯 명의 빌더. 사이드 프로젝트로 시작한 사람부터 두 번째 회사를 만드는 사람까지 — 일하는 모습을 그대로 보여줍니다.</p>
+      </div>
+      <a href="#" class="more">전체 빌더 보기 →</a>
+    </div>
+    <div class="builder-grid">
+      <article class="builder-card">
+        <div class="builder-portrait pat-3">
+          <span class="pill">AI</span>
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <circle cx="120" cy="80" r="32" fill="rgba(201,138,43,0.25)"/>
+            <circle cx="120" cy="80" r="20" fill="rgba(255,255,255,0.4)"/>
+            <text x="50%" y="78%" text-anchor="middle" font-family="Noto Serif KR" font-size="16" font-weight="700" fill="rgba(255,255,255,0.85)">김지현</text>
+          </svg>
+        </div>
+        <div class="builder-info">
+          <div class="nm">김지현</div>
+          <div class="role">AI 엔지니어 · ex-OpenAI</div>
+          <p class="bio">샌프란시스코에서 4년, 지금은 보스턴에서 alignment 평가 시스템을 만듭니다. 사이드로는 한국어 LLM 평가셋 오픈소스화.</p>
+          <div class="links">
+            <a>GitHub</a><a>Blog</a><a>Talk</a>
+          </div>
+        </div>
+      </article>
+      <article class="builder-card">
+        <div class="builder-portrait pat-2">
+          <span class="pill">Founder</span>
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <g fill="rgba(255,255,255,0.4)">
+              <rect x="80" y="60" width="80" height="50" rx="4"/>
+              <rect x="90" y="115" width="60" height="6" rx="2"/>
+            </g>
+            <text x="50%" y="78%" text-anchor="middle" font-family="Noto Serif KR" font-size="16" font-weight="700" fill="rgba(255,255,255,0.9)">박세연</text>
+          </svg>
+        </div>
+        <div class="builder-info">
+          <div class="nm">박세연</div>
+          <div class="role">풀스택 빌더 · Vibe Studios 창업</div>
+          <p class="bio">디자이너 출신 풀스택 빌더. 8개월 만에 첫 SaaS를 만들어 ARR $80K를 만들고 있습니다. 다음은 2번째 제품.</p>
+          <div class="links">
+            <a>Product</a><a>Twitter</a><a>Talk</a>
+          </div>
+        </div>
+      </article>
+      <article class="builder-card">
+        <div class="builder-portrait pat-5">
+          <span class="pill">Research</span>
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <g stroke="rgba(201,138,43,0.7)" stroke-width="1.2" fill="none">
+              <circle cx="120" cy="80" r="40"/>
+              <circle cx="120" cy="80" r="25"/>
+              <circle cx="120" cy="80" r="12"/>
+              <line x1="60" y1="80" x2="180" y2="80"/>
+              <line x1="120" y1="40" x2="120" y2="120"/>
+            </g>
+            <text x="50%" y="78%" text-anchor="middle" font-family="Noto Serif KR" font-size="16" font-weight="700" fill="rgba(255,255,255,0.85)">이도현</text>
+          </svg>
+        </div>
+        <div class="builder-info">
+          <div class="nm">이도현</div>
+          <div class="role">양자컴퓨팅 리서처 · IBM Research</div>
+          <p class="bio">취리히 IBM 연구소에서 양자 오류 정정 알고리즘 연구. 한국어로 양자컴퓨팅을 설명하는 무료 강의를 매주 한 편씩.</p>
+          <div class="links">
+            <a>Paper</a><a>Lectures</a><a>GitHub</a>
+          </div>
+        </div>
+      </article>
+      <article class="builder-card">
+        <div class="builder-portrait pat-4">
+          <span class="pill">Design+Dev</span>
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <g fill="rgba(255,255,255,0.35)">
+              <rect x="70" y="50" width="50" height="50" rx="6"/>
+              <rect x="125" y="65" width="50" height="50" rx="6"/>
+            </g>
+            <text x="50%" y="78%" text-anchor="middle" font-family="Noto Serif KR" font-size="16" font-weight="700" fill="rgba(255,255,255,0.92)">정혜리</text>
+          </svg>
+        </div>
+        <div class="builder-info">
+          <div class="nm">정혜리</div>
+          <div class="role">디자인+엔지니어 · ex-Figma</div>
+          <p class="bio">3년간 Figma에서 컴포넌트 시스템을 만들었고, 지금은 디자인 도구 자체를 만드는 작은 회사를 시작했습니다.</p>
+          <div class="links">
+            <a>Dribbble</a><a>GitHub</a><a>Site</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Programs -->
+<section class="bh-section" id="programs">
+  <div class="wrap">
+    <div class="section-h">
+      <div class="left">
+        <div class="kicker">Programs · 지원 프로그램</div>
+        <h2>혼자 시작하지 않는 <em>네 가지 방법.</em></h2>
+        <p class="desc">정기 멘토링부터 사이드 프로젝트 그랜트, 3개월 거주 프로그램까지. humanaid Builder Hub가 운영하는 네 가지 빌더 지원 프로그램입니다.</p>
+      </div>
+      <a href="#" class="more">신청 가이드 →</a>
+    </div>
+    <div class="prog-grid">
+      <article class="prog-card">
+        <div class="num-big">01</div>
+        <div class="head">
+          <div class="meta-tag">Residency<span class="deadline">D-12 마감</span></div>
+          <h3>Builder Residency</h3>
+        </div>
+        <div class="body">
+          <p>분기마다 6명을 선발합니다. 3개월간 강남 빌더 라운지를 기반으로 사이드 프로젝트를 진행하고, 매주 멘토와 진행 상황을 공유합니다. 발표는 데모 데이로 마무리.</p>
+          <div class="features">
+            <span>3개월</span><span>강남 라운지</span><span>주 1회 멘토링</span><span>데모 데이</span>
+          </div>
+          <a class="apply">지원하기 →</a>
+        </div>
+      </article>
+      <article class="prog-card">
+        <div class="num-big">02</div>
+        <div class="head">
+          <div class="meta-tag">Mentor Match<span class="deadline">상시 모집</span></div>
+          <h3>Mentor 1:1 매칭</h3>
+        </div>
+        <div class="body">
+          <p>분야별 시니어 멘토 38명과 1:1 매칭. 커리어, 기술, 제품, 경영까지 — 60분 세션을 분기마다 한 번 무료로 사용할 수 있습니다. Pro 멤버는 매월 1회.</p>
+          <div class="features">
+            <span>60분 세션</span><span>분기 1회</span><span>38명 풀</span><span>비공개</span>
+          </div>
+          <a class="apply">멘토 둘러보기 →</a>
+        </div>
+      </article>
+      <article class="prog-card">
+        <div class="num-big">03</div>
+        <div class="head">
+          <div class="meta-tag">Grant<span class="deadline">D-18 마감</span></div>
+          <h3>Side Project Grant</h3>
+        </div>
+        <div class="body">
+          <p>오픈소스, 사이드 프로젝트, 학생 연구 등을 위한 소규모 그랜트. 월 $500–$2,000을 최대 6개월간 지원하며, 결과물은 공개를 원칙으로 합니다. 올해 47개 프로젝트 지원 완료.</p>
+          <div class="features">
+            <span>월 $500–2K</span><span>최대 6개월</span><span>공개 원칙</span>
+          </div>
+          <a class="apply">지원하기 →</a>
+        </div>
+      </article>
+      <article class="prog-card">
+        <div class="num-big">04</div>
+        <div class="head">
+          <div class="meta-tag">Open Source<span class="deadline">상시 모집</span></div>
+          <h3>OSS Sponsor 매칭</h3>
+        </div>
+        <div class="body">
+          <p>오픈소스 메인테이너에게 월 정기 후원. humanaid가 매칭한 기업 스폰서가 후원금을 매월 자동 송금. 코드 너머의 시간이 정당하게 보상받는 구조를 만듭니다.</p>
+          <div class="features">
+            <span>월 정기</span><span>기업 매칭</span><span>비독점</span>
+          </div>
+          <a class="apply">메인테이너 등록 →</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Events -->
+<section class="bh-section alt">
+  <div class="wrap">
+    <div class="section-h">
+      <div class="left">
+        <div class="kicker">Events · 다가오는 이벤트</div>
+        <h2>이번 달, <em>오프라인에서도 만나요.</em></h2>
+        <p class="desc">데모 데이, 미팅업, 해커톤, 워크숍. 모든 이벤트는 멤버에게 우선 신청권이 주어지며, 비멤버는 잔여 좌석에서 참여할 수 있습니다.</p>
+      </div>
+      <a href="#" class="more">전체 캘린더 →</a>
+    </div>
+    <div class="event-list">
+      <div class="event-row">
+        <div class="event-date">
+          <div class="month">May</div>
+          <div class="day">18</div>
+          <div class="year">2026</div>
+        </div>
+        <div class="event-info">
+          <h4>humanaid Builder Demo Day · Spring '26</h4>
+          <div class="meta">
+            <span>강남 라운지</span>
+            <span class="dot">·</span>
+            <span>오후 7:00 — 10:00</span>
+            <span class="dot">·</span>
+            <span>참가 무료 · 멤버 우선</span>
+          </div>
+        </div>
+        <span class="event-tag demo">Demo Day</span>
+        <a class="event-cta live">신청하기</a>
+      </div>
+      <div class="event-row">
+        <div class="event-date">
+          <div class="month">Jun</div>
+          <div class="day">05</div>
+          <div class="year">2026</div>
+        </div>
+        <div class="event-info">
+          <h4>AI Engineering Korea Meetup #14</h4>
+          <div class="meta">
+            <span>판교 카카오 사옥</span>
+            <span class="dot">·</span>
+            <span>오후 7:30 — 10:00</span>
+            <span class="dot">·</span>
+            <span>이번 주제: 추론 비용 최적화</span>
+          </div>
+        </div>
+        <span class="event-tag meetup">Meetup</span>
+        <a class="event-cta">신청하기</a>
+      </div>
+      <div class="event-row">
+        <div class="event-date">
+          <div class="month">Jun</div>
+          <div class="day">22</div>
+          <div class="year">2026</div>
+        </div>
+        <div class="event-info">
+          <h4>LLM Hackathon w/ Anthropic Korea — 48시간</h4>
+          <div class="meta">
+            <span>온·오프라인 하이브리드</span>
+            <span class="dot">·</span>
+            <span>6/22 09:00 — 6/24 09:00</span>
+            <span class="dot">·</span>
+            <span>상금 ₩30,000,000</span>
+          </div>
+        </div>
+        <span class="event-tag hack">Hackathon</span>
+        <a class="event-cta">신청하기</a>
+      </div>
+      <div class="event-row">
+        <div class="event-date">
+          <div class="month">Jul</div>
+          <div class="day">12</div>
+          <div class="year">2026</div>
+        </div>
+        <div class="event-info">
+          <h4>AI Safety Workshop · 보스턴 방문 세션</h4>
+          <div class="meta">
+            <span>보스턴 (현지)</span>
+            <span class="dot">·</span>
+            <span>오후 1:00 — 6:00 EST</span>
+            <span class="dot">·</span>
+            <span>15석 한정</span>
+          </div>
+        </div>
+        <span class="event-tag workshop">Workshop</span>
+        <a class="event-cta">대기 신청</a>
+      </div>
+      <div class="event-row">
+        <div class="event-date">
+          <div class="month">Jul</div>
+          <div class="day">29</div>
+          <div class="year">2026</div>
+        </div>
+        <div class="event-info">
+          <h4>Builder × Designer Salon · 코드 리뷰 라운드테이블</h4>
+          <div class="meta">
+            <span>한남동</span>
+            <span class="dot">·</span>
+            <span>오후 8:00 — 11:00</span>
+            <span class="dot">·</span>
+            <span>20석 한정 · 초대제</span>
+          </div>
+        </div>
+        <span class="event-tag meetup">Meetup</span>
+        <a class="event-cta">초대 요청</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Job Board -->
+<section class="bh-section">
+  <div class="wrap">
+    <div class="section-h">
+      <div class="left">
+        <div class="kicker">Job Board · 이번 주 모집 중</div>
+        <h2>지금 채용 중인 <em>빌더 자리.</em></h2>
+        <p class="desc">매주 월요일 큐레이션. AI·반도체·로보틱스·바이오테크·프론티어 분야 한정. 멤버에게는 추가 정보(연봉 범위, 담당자 1:1 연락)가 공개됩니다.</p>
+      </div>
+      <a href="#" class="more">전체 채용 →</a>
+    </div>
+    <div class="jobs-grid">
+      <article class="job-card">
+        <div class="job-top">
+          <div class="job-logo t">A</div>
+          <div class="job-co">Anthropic Korea<span class="loc">서울 / 하이브리드</span></div>
+        </div>
+        <h4>AI Researcher · Alignment Team</h4>
+        <div class="job-tags">
+          <span class="hot">HOT</span><span>Full-time</span><span>5+년</span><span>Python</span><span>PyTorch</span>
+        </div>
+        <div class="job-bottom">
+          <span>2일 전 등록</span>
+          <span class="salary">₩180–280M</span>
+        </div>
+      </article>
+      <article class="job-card">
+        <div class="job-top">
+          <div class="job-logo">N</div>
+          <div class="job-co">Naver Cloud<span class="loc">분당</span></div>
+        </div>
+        <h4>LLM Engineer · HyperCLOVA Infra</h4>
+        <div class="job-tags">
+          <span>Full-time</span><span>3+년</span><span>분산학습</span><span>Triton</span>
+        </div>
+        <div class="job-bottom">
+          <span>4일 전 등록</span>
+          <span class="salary">₩120–180M</span>
+        </div>
+      </article>
+      <article class="job-card">
+        <div class="job-top">
+          <div class="job-logo f">T</div>
+          <div class="job-co">Toss<span class="loc">강남</span></div>
+        </div>
+        <h4>Frontend Builder · 결제 플랫폼</h4>
+        <div class="job-tags">
+          <span>Full-time</span><span>4+년</span><span>React</span><span>TypeScript</span>
+        </div>
+        <div class="job-bottom">
+          <span>5일 전 등록</span>
+          <span class="salary">₩100–160M</span>
+        </div>
+      </article>
+      <article class="job-card">
+        <div class="job-top">
+          <div class="job-logo o">K</div>
+          <div class="job-co">카카오브레인<span class="loc">판교</span></div>
+        </div>
+        <h4>ML Infrastructure Engineer</h4>
+        <div class="job-tags">
+          <span>Full-time</span><span>3+년</span><span>K8s</span><span>GPU 클러스터</span>
+        </div>
+        <div class="job-bottom">
+          <span>일주일 전</span>
+          <span class="salary">₩110–170M</span>
+        </div>
+      </article>
+      <article class="job-card">
+        <div class="job-top">
+          <div class="job-logo t">V</div>
+          <div class="job-co">Vibe Studios<span class="loc">서울 · 원격 가능</span></div>
+        </div>
+        <h4>Founding Engineer · 시리즈 A 직전</h4>
+        <div class="job-tags">
+          <span class="hot">HOT</span><span>Full-time</span><span>Equity</span><span>풀스택</span>
+        </div>
+        <div class="job-bottom">
+          <span>1일 전 등록</span>
+          <span class="salary">₩100–150M + Eq</span>
+        </div>
+      </article>
+      <article class="job-card">
+        <div class="job-top">
+          <div class="job-logo f">L</div>
+          <div class="job-co">Lunit<span class="loc">강남 · 의료 AI</span></div>
+        </div>
+        <h4>Senior ML Engineer · 의료 영상</h4>
+        <div class="job-tags">
+          <span>Full-time</span><span>5+년</span><span>의료 AI</span><span>FDA</span>
+        </div>
+        <div class="job-bottom">
+          <span>3일 전 등록</span>
+          <span class="salary">₩140–200M</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Showcase -->
+<section class="bh-section alt">
+  <div class="wrap">
+    <div class="section-h">
+      <div class="left">
+        <div class="kicker">Showcase · 빌더 프로젝트</div>
+        <h2>이번 달, <em>멤버들이 만든 것들.</em></h2>
+        <p class="desc">Builder Hub 멤버들이 진행 중인 프로젝트 일부. 사이드 프로젝트부터 소규모 SaaS, 오픈소스 라이브러리까지. 클릭하면 메이커와 직접 연결됩니다.</p>
+      </div>
+      <a href="#" class="more">전체 프로젝트 →</a>
+    </div>
+    <div class="show-grid">
+      <article class="show-card">
+        <div class="show-thumb pat-1">
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <g fill="rgba(255,255,255,0.3)" stroke="rgba(201,138,43,0.6)" stroke-width="1">
+              <circle cx="60" cy="90" r="14"/>
+              <circle cx="120" cy="90" r="20"/>
+              <circle cx="180" cy="90" r="14"/>
+              <line x1="74" y1="90" x2="100" y2="90"/>
+              <line x1="140" y1="90" x2="166" y2="90"/>
+            </g>
+            <text x="50%" y="80%" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="rgba(255,255,255,0.7)" letter-spacing="0.18em">VOICE-AI · OSS</text>
+          </svg>
+        </div>
+        <div class="show-info">
+          <div class="stack">Python · Whisper · Transformers</div>
+          <h4>Hangul Voice — 한국어 음성 AI 오픈소스</h4>
+          <p>방언과 노년층 발음까지 처리하는 한국어 voice 모델. 학교 봉사 활동에서 시작해 오픈소스로 공개.</p>
+          <div class="show-meta">
+            <span class="star">★ 1.2K</span>
+            <span>커밋 348</span>
+            <span class="by">정도훈, 이주연</span>
+          </div>
+        </div>
+      </article>
+      <article class="show-card">
+        <div class="show-thumb pat-4">
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <g fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2">
+              <rect x="50" y="55" width="60" height="70" rx="6"/>
+              <rect x="130" y="55" width="60" height="70" rx="6"/>
+              <line x1="60" y1="75" x2="100" y2="75"/>
+              <line x1="60" y1="90" x2="95" y2="90"/>
+              <line x1="60" y1="105" x2="100" y2="105"/>
+              <line x1="140" y1="75" x2="180" y2="75"/>
+              <line x1="140" y1="90" x2="175" y2="90"/>
+              <line x1="140" y1="105" x2="180" y2="105"/>
+            </g>
+            <text x="50%" y="83%" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="rgba(255,255,255,0.75)" letter-spacing="0.18em">PAIR-PROG</text>
+          </svg>
+        </div>
+        <div class="show-info">
+          <div class="stack">TypeScript · VS Code Extension</div>
+          <h4>PairLane — AI 페어 프로그래밍 IDE 플러그인</h4>
+          <p>코드 작성 의도를 모델과 공유하는 새로운 인터페이스. 베타 사용자 1,200명, 평균 페어 세션 47분.</p>
+          <div class="show-meta">
+            <span class="star">★ 840</span>
+            <span>설치 12K</span>
+            <span class="by">박세연, 정혜리</span>
+          </div>
+        </div>
+      </article>
+      <article class="show-card">
+        <div class="show-thumb pat-3">
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <g stroke="rgba(201,138,43,0.7)" stroke-width="1.5" fill="none">
+              <circle cx="120" cy="90" r="50"/>
+              <circle cx="120" cy="90" r="30"/>
+              <circle cx="120" cy="90" r="10"/>
+            </g>
+            <g fill="rgba(255,255,255,0.85)">
+              <circle cx="120" cy="40" r="3"/>
+              <circle cx="170" cy="90" r="3"/>
+              <circle cx="120" cy="140" r="3"/>
+              <circle cx="70" cy="90" r="3"/>
+            </g>
+            <text x="50%" y="80%" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="rgba(255,255,255,0.7)" letter-spacing="0.18em">QUANTUM · LIB</text>
+          </svg>
+        </div>
+        <div class="show-info">
+          <div class="stack">Python · Qiskit · NumPy</div>
+          <h4>Qubit-Korea — 양자컴퓨팅 학습용 시뮬레이터</h4>
+          <p>한국어 주석과 시각화에 집중한 양자컴퓨팅 학습용 라이브러리. 학부생 강의 자료로 5개 대학에서 사용 중.</p>
+          <div class="show-meta">
+            <span class="star">★ 620</span>
+            <span>다운 8K</span>
+            <span class="by">이도현</span>
+          </div>
+        </div>
+      </article>
+      <article class="show-card">
+        <div class="show-thumb pat-2">
+          <svg viewBox="0 0 240 180" preserveAspectRatio="xMidYMid slice">
+            <rect width="240" height="180" fill="url(#grain)"/>
+            <g fill="rgba(255,255,255,0.3)">
+              <rect x="40" y="100" width="20" height="40"/>
+              <rect x="70" y="80" width="20" height="60"/>
+              <rect x="100" y="60" width="20" height="80"/>
+              <rect x="130" y="90" width="20" height="50"/>
+              <rect x="160" y="50" width="20" height="90"/>
+              <rect x="190" y="70" width="20" height="70"/>
+            </g>
+            <text x="50%" y="32%" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="rgba(255,255,255,0.85)" letter-spacing="0.16em">MED-AI · SaaS</text>
+          </svg>
+        </div>
+        <div class="show-info">
+          <div class="stack">PyTorch · Next.js · FastAPI</div>
+          <h4>RetinaScope — 의료 영상 AI 진단 도구</h4>
+          <p>안과 망막 영상에서 조기 당뇨망막병증을 검출하는 AI 도구. 베트남 시골 클리닉 3곳에서 파일럿 진행 중.</p>
+          <div class="show-meta">
+            <span class="star">★ 320</span>
+            <span>임상 3곳</span>
+            <span class="by">한승우, 김지현</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Apply CTA -->
+<section class="bh-apply" id="apply">
+  <div class="wrap apply-grid">
+    <div>
+      <h2>지금 <em>빌딩하고 있나요?</em><br>그러면 이미 자격이 있습니다.</h2>
+      <p class="lede">멤버십은 결과물이 아니라 과정을 보고 결정합니다. 사이드 프로젝트, 첫 PR, 첫 데모 — 무엇이든 좋습니다. 지원서 검토는 영업일 기준 5일 이내, 승인되면 그날 안에 슬랙 초대장이 도착합니다.</p>
+      <ul class="apply-checks">
+        <li>슬랙 23개 채널 즉시 입장</li>
+        <li>월간 AI 크레딧 $50</li>
+        <li>분기별 멘토 매칭</li>
+        <li>50+개 도구 디스카운트</li>
+        <li>월간 빌더 미팅업</li>
+        <li>오프라인 라운지 사용</li>
+      </ul>
+    </div>
+    <form class="apply-form" onsubmit="event.preventDefault();">
+      <h4>멤버십 신청서</h4>
+      <div class="field">
+        <label>이름</label>
+        <input type="text" placeholder="홍길동" />
+      </div>
+      <div class="field">
+        <label>이메일</label>
+        <input type="email" placeholder="your@email.com" />
+      </div>
+      <div class="field">
+        <label>현재 활동 분야</label>
+        <select>
+          <option>AI / 머신러닝</option>
+          <option>반도체 / 하드웨어</option>
+          <option>로보틱스</option>
+          <option>바이오테크</option>
+          <option>풀스택 / 프로덕트</option>
+          <option>디자인 + 엔지니어링</option>
+          <option>학생 / 리서처</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>지금 만들고 있는 것 (한 줄)</label>
+        <textarea placeholder="예: 한국어 RAG 검색 엔진을 만드는 중"></textarea>
+      </div>
+      <button type="submit">신청서 보내기 →</button>
+    </form>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <div class="ft-brand">humanaid</div>
+        <div class="ft-tag">사람과 AI, 디지털을 잇는 기술 매거진.</div>
+        <a href="tel:0269254867" class="ft-phone">02-6925-4867</a>
+        <div class="ft-time">10:00–18:00 (주말·공휴일 제외)</div>
+        <a href="mailto:hello@humanaid.digital" style="color:rgba(255,255,255,.65); margin-top:12px; display:inline-block;">hello@humanaid.digital</a>
+      </div>
+      <div>
+        <h5>서비스</h5>
+        <a href="humanaid.html">매거진</a>
+        <a href="field-notes.html">필드 노트</a>
+        <a href="builder-hub.html">Builder Hub</a>
+        <a href="#">컬렉션</a>
+        <a href="#">물어봐 AI</a>
+      </div>
+      <div>
+        <h5>humanaid</h5>
+        <a href="#">소개</a>
+        <a href="#">작가 지원</a>
+        <a href="#">파트너 제휴</a>
+        <a href="#">콘텐츠 제안</a>
+        <a href="#">광고 문의</a>
+      </div>
+      <div>
+        <h5>구독·앱</h5>
+        <a href="#">뉴스레터</a>
+        <a href="#">크롬 확장 프로그램</a>
+        <a href="#">슬랙 봇 설치</a>
+        <a href="#">RSS</a>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <div class="legal">
+        <a href="#" class="bold">이용약관</a>
+        <a href="#" class="bold">개인정보 처리방침</a>
+        <a href="#">청소년보호정책</a>
+        <a href="#">윤리강령</a>
+        <a href="#">데이터 보안 가이드</a>
+      </div>
+      <div class="ft-corp">
+        <p>(주)휴머네이드 · 대표이사 김지현</p>
+        <p>서울특별시 종로구 사직로 123, 5층</p>
+        <p>사업자등록번호 : 123-45-67890 · 인터넷신문등록번호 : 서울,아54129</p>
+        <p>제호 : humanaid · 발행인 김지현 · 편집인 류서원</p>
+        <p>등록일 : 2024년 03월 15일 · 발행일 : 2024년 04월 01일</p>
+        <div class="ft-copy">© 2024–2026 humanaid Inc. All rights reserved.</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
