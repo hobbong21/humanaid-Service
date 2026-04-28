@@ -558,9 +558,71 @@
   }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     초기화
+     다크모드 토글
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initDarkMode() {
+    const dmStyle = document.createElement('style');
+    dmStyle.textContent = `
+      body.dark-mode {
+        --bg: #0F0F0F;
+        --surface: #1A1A1A;
+        --surface-2: #222222;
+        --ink: #EFEFEF;
+        --ink-soft: #AAAAAA;
+        --ink-mute: #666666;
+        --line: #2A2A2A;
+        --line-strong: #333333;
+        --paper: #1A1A1A;
+        --rank: #EFEFEF;
+      }
+      body.dark-mode header.main,
+      body.dark-mode .util,
+      body.dark-mode .cats,
+      body.dark-mode .editor-pick,
+      body.dark-mode .col-block,
+      body.dark-mode .top-card,
+      body.dark-mode .builder-section,
+      body.dark-mode .prog-card,
+      body.dark-mode .event-row,
+      body.dark-mode .job-card,
+      body.dark-mode .note-card,
+      body.dark-mode .ha-generic-modal {
+        background: var(--surface) !important;
+        border-color: var(--line) !important;
+      }
+      body.dark-mode .signup-card { background: #222 !important; }
+      body.dark-mode .ar-thumb { filter: brightness(0.75); }
+      #ha-dm-btn {
+        background: none; border: 1px solid var(--line-strong);
+        border-radius: 999px; width: 34px; height: 34px;
+        cursor: pointer; font-size: 16px; display: flex; align-items: center;
+        justify-content: center; transition: border-color .15s, background .15s;
+        color: var(--ink); flex-shrink: 0;
+      }
+      #ha-dm-btn:hover { background: var(--surface-2); border-color: var(--ink-mute); }
+    `;
+    document.head.appendChild(dmStyle);
+
+    const btn = document.createElement('button');
+    btn.id = 'ha-dm-btn';
+    btn.title = '다크/라이트 모드 전환';
+    const saved = localStorage.getItem('ha-theme');
+    const isDark = saved === 'dark';
+    btn.textContent = isDark ? '☀' : '☾';
+    if (isDark) document.body.classList.add('dark-mode');
+
+    btn.addEventListener('click', function () {
+      const nowDark = document.body.classList.toggle('dark-mode');
+      btn.textContent = nowDark ? '☀' : '☾';
+      localStorage.setItem('ha-theme', nowDark ? 'dark' : 'light');
+    });
+
+    const headerRight = document.querySelector('.header-right');
+    if (headerRight) headerRight.prepend(btn);
+  }
+
   function init() {
+    initDarkMode();
     initCategoryFilter();
     initNewsletter();
     initScrapButtons();

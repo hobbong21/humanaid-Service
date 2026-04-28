@@ -53,6 +53,12 @@
       font-family: 'Noto Sans KR', sans-serif; padding: 0; text-decoration: underline;
     }
     .ha-logout-btn:hover { color: #B8412A; }
+    .ha-mypage-btn {
+      font-size: 13px; color: #888; font-weight: 500;
+      border: 1px solid #ddd; border-radius: 999px; padding: 5px 12px;
+      transition: all .15s;
+    }
+    .ha-mypage-btn:hover { color: #111; border-color: #999; }
   `;
   document.head.appendChild(style);
 
@@ -179,6 +185,7 @@
     menu.className = 'ha-user-menu';
     menu.id = 'haUserMenu';
     menu.innerHTML = `
+      <a href="/mypage.html" class="ha-mypage-btn">마이페이지</a>
       <span class="ha-user-nick">${user.nickname || user.email}</span>
       <button class="ha-logout-btn" id="haLogoutBtn">로그아웃</button>
     `;

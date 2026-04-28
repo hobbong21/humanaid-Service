@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>마이페이지 — humanaid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F4;
+    --ink: #111111;
+    --ink-soft: #555555;
+    --ink-mute: #9A9A9A;
+    --line: #ECECEC;
+    --line-strong: #DCDCDC;
+    --terra: #B8412A;
+    --terra-deep: #8E2F1E;
+    --forest: #1F3A2E;
+    --ochre: #C98A2B;
+    --paper: #ffffff;
+    --serif: 'Noto Serif KR', serif;
+    --serif-kr: 'Noto Serif KR', serif;
+    --sans: 'Noto Sans KR', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+  .util { background: var(--surface); color: var(--ink-soft); font-size: 12px; border-bottom: 1px solid var(--line); }
+  .util .row { display: flex; justify-content: space-between; align-items: center; height: 38px; }
+  .util a { color: var(--ink-soft); transition: color .15s; }
+  .util a:hover { color: var(--terra); }
+  .util .left { display: flex; gap: 22px; align-items: center; }
+  .util .left a:first-child { font-weight: 600; color: var(--ink); font-size: 12.5px; }
+  .util .right { display: flex; gap: 22px; }
+
+  header.main { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 50; }
+  header.main .row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; height: 78px; gap: 48px; }
+  .logo { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: -0.03em; color: var(--ink); display: flex; align-items: baseline; gap: 4px; }
+  .logo .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--terra); display: inline-block; transform: translateY(-2px); margin-left: 2px; }
+  nav.primary { display: flex; gap: 30px; }
+  nav.primary a { font-size: 14.5px; font-weight: 500; color: var(--ink); padding: 6px 0; position: relative; transition: color .15s; }
+  nav.primary a:hover { color: var(--terra); }
+  .header-right { display: flex; align-items: center; gap: 18px; }
+  .header-right .ad { font-size: 13px; color: var(--ink-soft); font-weight: 500; padding: 7px 13px; border: 1px solid var(--line-strong); border-radius: 999px; transition: all .15s; }
+  .header-right .ad:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .header-right .author, .header-right .login { font-size: 14px; color: var(--ink-soft); font-weight: 500; }
+  .header-right .signup { font-size: 14px; font-weight: 600; background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 4px; transition: background .15s; }
+  .header-right .signup:hover { background: var(--terra); }
+
+  /* ── 마이페이지 레이아웃 ── */
+  .mypage-hero {
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 48px 0 40px;
+  }
+  .mypage-hero-inner { display: flex; align-items: center; gap: 28px; }
+  .mp-avatar {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--ochre), var(--terra));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 28px; font-weight: 700;
+    font-family: var(--serif); flex-shrink: 0;
+  }
+  .mp-info h1 { font-family: var(--serif-kr); font-size: 26px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.025em; }
+  .mp-info .mp-email { font-size: 14px; color: var(--ink-mute); }
+  .mp-info .mp-joined { font-size: 13px; color: var(--ink-mute); font-family: var(--mono); margin-top: 6px; }
+  .mp-stats { margin-left: auto; display: flex; gap: 36px; flex-shrink: 0; }
+  .mp-stat { text-align: center; }
+  .mp-stat .num { font-family: var(--serif); font-size: 32px; font-weight: 700; color: var(--terra); line-height: 1; }
+  .mp-stat .lbl { font-size: 12px; color: var(--ink-mute); margin-top: 4px; }
+
+  .mypage-body { padding: 48px 0 80px; }
+  .mp-grid { display: grid; grid-template-columns: 260px 1fr; gap: 40px; align-items: start; }
+
+  /* 사이드 메뉴 */
+  .mp-sidebar { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 0; }
+  .mp-menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 22px; font-size: 14.5px; font-weight: 500;
+    color: var(--ink-soft); cursor: pointer; transition: all .12s;
+    border-left: 3px solid transparent;
+  }
+  .mp-menu-item:hover { color: var(--ink); background: var(--surface-2); }
+  .mp-menu-item.active { color: var(--terra); border-left-color: var(--terra); background: #FFF8F6; font-weight: 600; }
+  .mp-menu-icon { width: 18px; text-align: center; font-size: 16px; }
+  .mp-menu-divider { height: 1px; background: var(--line); margin: 6px 0; }
+
+  /* 콘텐츠 패널 */
+  .mp-panel { display: none; }
+  .mp-panel.active { display: block; }
+  .mp-panel-title {
+    font-family: var(--serif-kr); font-size: 20px; font-weight: 700;
+    margin: 0 0 6px; letter-spacing: -0.025em;
+  }
+  .mp-panel-sub { font-size: 13.5px; color: var(--ink-mute); margin: 0 0 28px; }
+
+  /* 스크랩 리스트 */
+  .scrap-list { list-style: none; padding: 0; margin: 0; }
+  .scrap-item {
+    display: flex; align-items: center; gap: 20px;
+    padding: 18px 0; border-bottom: 1px solid var(--line);
+    transition: background .1s;
+  }
+  .scrap-item:last-child { border-bottom: 0; }
+  .scrap-type-badge {
+    flex-shrink: 0; font-family: var(--mono); font-size: 10px;
+    letter-spacing: .12em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px;
+    background: var(--surface-2); color: var(--ink-mute);
+    border: 1px solid var(--line);
+  }
+  .scrap-type-badge.article { background: #FFF0EC; color: var(--terra); border-color: #F5C4B8; }
+  .scrap-type-badge.note { background: #F0F4FF; color: #3B5BDB; border-color: #C5D0F5; }
+  .scrap-type-badge.event { background: #F0FFF4; color: #2F855A; border-color: #B2DFBC; }
+  .scrap-content { flex: 1; min-width: 0; }
+  .scrap-title { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .scrap-meta { font-size: 12px; color: var(--ink-mute); margin-top: 3px; font-family: var(--mono); }
+  .scrap-del {
+    flex-shrink: 0; background: none; border: none; color: var(--ink-mute);
+    font-size: 18px; cursor: pointer; padding: 6px; border-radius: 4px;
+    transition: color .12s, background .12s; line-height: 1;
+  }
+  .scrap-del:hover { color: var(--terra); background: #FFF0EC; }
+
+  /* 빈 상태 */
+  .mp-empty {
+    text-align: center; padding: 64px 0;
+    color: var(--ink-mute);
+  }
+  .mp-empty .icon { font-size: 42px; margin-bottom: 16px; }
+  .mp-empty h3 { font-family: var(--serif-kr); font-size: 18px; color: var(--ink-soft); margin: 0 0 8px; }
+  .mp-empty p { font-size: 14px; line-height: 1.7; }
+  .mp-empty a { color: var(--terra); font-weight: 500; }
+
+  /* 로그인 유도 */
+  .mp-login-wall {
+    text-align: center; padding: 80px 0;
+  }
+  .mp-login-wall h2 { font-family: var(--serif-kr); font-size: 24px; font-weight: 700; margin: 0 0 12px; letter-spacing: -0.025em; }
+  .mp-login-wall p { font-size: 15px; color: var(--ink-soft); margin: 0 0 28px; }
+  .mp-login-wall .btn { display: inline-block; background: var(--ink); color: #fff; padding: 13px 30px; border-radius: 5px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; border: none; font-family: var(--sans); }
+  .mp-login-wall .btn:hover { background: var(--terra); }
+
+  /* 계정 설정 */
+  .mp-setting-block { margin-bottom: 36px; }
+  .mp-setting-block h4 { font-size: 15px; font-weight: 600; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .mp-field { margin-bottom: 16px; }
+  .mp-field label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-soft); margin-bottom: 6px; }
+  .mp-field .val { font-size: 15px; color: var(--ink); }
+  .mp-tag { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-soft); }
+
+  /* 알림 배지 */
+  .mp-badge { display: inline-block; background: var(--terra); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-left: 6px; vertical-align: middle; font-family: var(--mono); }
+
+  /* 로딩 */
+  .mp-loading { text-align: center; padding: 40px; color: var(--ink-mute); font-family: var(--mono); font-size: 13px; }
+
+  footer { background: #111; color: rgba(255,255,255,.65); padding: 56px 0 32px; margin-top: 80px; }
+  .ft-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+  .ft-brand { font-family: var(--serif); font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  .ft-tag { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.5); margin-bottom: 14px; }
+  .ft-phone { font-size: 14px; color: rgba(255,255,255,.7); font-weight: 500; }
+  .ft-time { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 4px; font-family: var(--mono); }
+  footer h5 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: rgba(255,255,255,.4); margin: 0 0 14px; }
+  footer div > a { display: block; font-size: 13.5px; color: rgba(255,255,255,.65); margin-bottom: 8px; transition: color .12s; }
+  footer div > a:hover { color: #fff; }
+  .ft-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 28px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .legal { display: flex; gap: 16px; flex-wrap: wrap; }
+  .legal a { font-size: 12px; color: rgba(255,255,255,.45); }
+  .legal a.bold { color: rgba(255,255,255,.65); font-weight: 500; }
+  .ft-corp { font-size: 12px; color: rgba(255,255,255,.35); line-height: 1.8; }
+  .ft-copy { margin-top: 10px; color: rgba(255,255,255,.3); }
+
+  @media (max-width: 768px) {
+    .mp-grid { grid-template-columns: 1fr; }
+    .mp-stats { gap: 20px; }
+    .mp-hero-inner { flex-wrap: wrap; }
+    .ft-grid { grid-template-columns: 1fr; }
+    nav.primary { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="util">
+  <div class="wrap row">
+    <div class="left">
+      <a href="index.html">humanaid</a>
+      <a href="field-notes.html">Field Notes</a>
+      <a href="builder-hub.html">Builder Hub</a>
+    </div>
+    <div class="right">
+      <a href="#">매거진 RSS</a>
+      <a href="#">English</a>
+    </div>
+  </div>
+</div>
+
+<header class="main">
+  <div class="wrap row">
+    <a href="index.html" class="logo">humanaid<span class="dot"></span></a>
+    <nav class="primary">
+      <a href="index.html">매거진</a>
+      <a href="field-notes.html">필드 노트</a>
+      <a href="builder-hub.html">Builder Hub</a>
+      <a href="#">컬렉션</a>
+      <a href="#">물어봐 AI</a>
+    </nav>
+    <div class="header-right">
+      <a href="#" class="ad">파트너 제휴</a>
+      <a href="#" class="login">로그인</a>
+      <a href="#" class="signup">회원가입</a>
+    </div>
+  </div>
+</header>
+
+<div id="mpLoginWall" style="display:none">
+  <div class="wrap">
+    <div class="mp-login-wall">
+      <h2>마이페이지에 오신 것을 환영합니다.</h2>
+      <p>로그인하면 스크랩 목록, 구독 현황, 계정 정보를 확인할 수 있어요.</p>
+      <button class="btn" id="mpLoginBtn">로그인하기 →</button>
+    </div>
+  </div>
+</div>
+
+<div id="mpContent" style="display:none">
+  <section class="mypage-hero">
+    <div class="wrap">
+      <div class="mypage-hero-inner">
+        <div class="mp-avatar" id="mpAvatar">?</div>
+        <div class="mp-info">
+          <h1 id="mpNickname">—</h1>
+          <div class="mp-email" id="mpEmail">—</div>
+          <div class="mp-joined" id="mpJoined"></div>
+        </div>
+        <div class="mp-stats">
+          <div class="mp-stat">
+            <div class="num" id="statScraps">0</div>
+            <div class="lbl">스크랩</div>
+          </div>
+          <div class="mp-stat">
+            <div class="num" id="statLikes">0</div>
+            <div class="lbl">좋아요</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mypage-body">
+    <div class="wrap mp-grid">
+      <aside class="mp-sidebar">
+        <div class="mp-menu-item active" data-panel="scraps">
+          <span class="mp-menu-icon">⌖</span> 내 스크랩
+          <span class="mp-badge" id="scrapBadge">0</span>
+        </div>
+        <div class="mp-menu-item" data-panel="activity">
+          <span class="mp-menu-icon">⌘</span> 활동 내역
+        </div>
+        <div class="mp-menu-divider"></div>
+        <div class="mp-menu-item" data-panel="settings">
+          <span class="mp-menu-icon">⚙</span> 계정 설정
+        </div>
+      </aside>
+
+      <main>
+        <!-- 스크랩 패널 -->
+        <div class="mp-panel active" id="panel-scraps">
+          <h2 class="mp-panel-title">내 스크랩</h2>
+          <p class="mp-panel-sub">저장해 둔 아티클, 노트, 이벤트를 모아볼 수 있어요.</p>
+          <div id="scrapListWrap">
+            <div class="mp-loading">불러오는 중…</div>
+          </div>
+        </div>
+
+        <!-- 활동 내역 패널 -->
+        <div class="mp-panel" id="panel-activity">
+          <h2 class="mp-panel-title">활동 내역</h2>
+          <p class="mp-panel-sub">최근 읽은 아티클, 좋아요, 댓글 활동이 표시됩니다.</p>
+          <div class="mp-empty">
+            <div class="icon">¶</div>
+            <h3>아직 기록된 활동이 없어요</h3>
+            <p>아티클을 읽고 좋아요를 누르면<br>여기에 기록됩니다.</p>
+          </div>
+        </div>
+
+        <!-- 계정 설정 패널 -->
+        <div class="mp-panel" id="panel-settings">
+          <h2 class="mp-panel-title">계정 설정</h2>
+          <p class="mp-panel-sub">계정 정보를 확인하고 관리하세요.</p>
+          <div class="mp-setting-block">
+            <h4>기본 정보</h4>
+            <div class="mp-field">
+              <label>이메일</label>
+              <div class="val" id="settingEmail">—</div>
+            </div>
+            <div class="mp-field">
+              <label>닉네임</label>
+              <div class="val" id="settingNick">—</div>
+            </div>
+            <div class="mp-field">
+              <label>멤버십</label>
+              <div class="val"><span class="mp-tag">FREE</span></div>
+            </div>
+          </div>
+          <div class="mp-setting-block">
+            <h4>알림 설정</h4>
+            <div class="mp-field">
+              <label>뉴스레터</label>
+              <div class="val">매주 금요일 아침</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <div class="ft-brand">humanaid</div>
+        <div class="ft-tag">사람과 AI, 디지털을 잇는 기술 매거진.</div>
+        <a href="tel:0269254867" class="ft-phone">02-6925-4867</a>
+        <div class="ft-time">10:00–18:00 (주말·공휴일 제외)</div>
+      </div>
+      <div><h5>서비스</h5><a href="field-notes.html">필드 노트</a><a href="#">데이터룸</a><a href="#">컬렉션</a></div>
+      <div><h5>humanaid</h5><a href="#">소개</a><a href="#">작가 지원</a><a href="#">광고 문의</a></div>
+      <div><h5>구독</h5><a href="#">뉴스레터</a><a href="#">RSS</a></div>
+    </div>
+    <div class="ft-bottom">
+      <div class="legal"><a href="#" class="bold">이용약관</a><a href="#" class="bold">개인정보 처리방침</a></div>
+      <div class="ft-corp">
+        <p>(주)휴머네이드 · 대표이사 김지현 · 서울특별시 종로구 사직로 123, 5층</p>
+        <div class="ft-copy">© 2024–2026 humanaid Inc. All rights reserved.</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/auth.js"></script>
+<script src="/interactions.js"></script>
+<script>
+(function () {
+  const TYPE_LABEL = { article: '아티클', note: '노트', event: '이벤트', job: '채용', program: '프로그램' };
+
+  async function loadMypage() {
+    const res = await fetch('/api/auth/me');
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+      document.getElementById('mpLoginWall').style.display = '';
+      document.getElementById('mpLoginBtn').addEventListener('click', function () {
+        if (window.haOpenLogin) window.haOpenLogin();
+      });
+      return;
+    }
+
+    const user = data.user;
+    document.getElementById('mpContent').style.display = '';
+    document.getElementById('mpAvatar').textContent = (user.nickname || user.email).charAt(0).toUpperCase();
+    document.getElementById('mpNickname').textContent = user.nickname || '이름 없음';
+    document.getElementById('mpEmail').textContent = user.email;
+    document.getElementById('settingEmail').textContent = user.email;
+    document.getElementById('settingNick').textContent = user.nickname || '—';
+    if (user.created_at) {
+      const d = new Date(user.created_at);
+      document.getElementById('mpJoined').textContent = d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) + ' 가입';
+    }
+
+    loadScraps();
+  }
+
+  async function loadScraps() {
+    const wrap = document.getElementById('scrapListWrap');
+    try {
+      const res = await fetch('/api/scraps');
+      if (res.status === 401) {
+        wrap.innerHTML = '<div class="mp-loading">로그인 세션이 만료되었습니다.</div>';
+        return;
+      }
+      const data = await res.json();
+      const scraps = data.scraps || [];
+
+      document.getElementById('statScraps').textContent = scraps.length;
+      document.getElementById('scrapBadge').textContent = scraps.length;
+
+      if (scraps.length === 0) {
+        wrap.innerHTML = `<div class="mp-empty">
+          <div class="icon">⌖</div>
+          <h3>아직 스크랩한 항목이 없어요</h3>
+          <p>아티클이나 노트에서 <strong>+ 스크랩</strong> 버튼을 누르면<br>여기에 모아볼 수 있어요.</p>
+          <p style="margin-top:16px"><a href="index.html">매거진 보러 가기 →</a></p>
+        </div>`;
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.className = 'scrap-list';
+      scraps.forEach(function (s) {
+        const li = document.createElement('li');
+        li.className = 'scrap-item';
+        const typeClass = s.item_type || 'article';
+        const typeText = TYPE_LABEL[typeClass] || typeClass;
+        const dt = new Date(s.created_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+        li.innerHTML = `
+          <span class="scrap-type-badge ${typeClass}">${typeText}</span>
+          <div class="scrap-content">
+            <div class="scrap-title">${s.item_title || s.item_key}</div>
+            <div class="scrap-meta">${dt} 저장</div>
+          </div>
+          <button class="scrap-del" title="스크랩 삭제" data-type="${s.item_type}" data-key="${s.item_key}">×</button>
+        `;
+        li.querySelector('.scrap-del').addEventListener('click', async function () {
+          const btn = this;
+          btn.disabled = true;
+          const r = await fetch('/api/scrap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemType: btn.dataset.type, itemKey: btn.dataset.key, itemTitle: '' })
+          });
+          if (r.ok) {
+            li.remove();
+            const cur = parseInt(document.getElementById('statScraps').textContent) || 0;
+            document.getElementById('statScraps').textContent = Math.max(0, cur - 1);
+            document.getElementById('scrapBadge').textContent = Math.max(0, cur - 1);
+            if (ul.querySelectorAll('li').length === 0) loadScraps();
+          }
+        });
+        ul.appendChild(li);
+      });
+      wrap.innerHTML = '';
+      wrap.appendChild(ul);
+    } catch (e) {
+      wrap.innerHTML = '<div class="mp-loading">불러오기 실패. 새로고침 해주세요.</div>';
+    }
+  }
+
+  document.querySelectorAll('.mp-menu-item').forEach(function (item) {
+    item.addEventListener('click', function () {
+      document.querySelectorAll('.mp-menu-item').forEach(function (i) { i.classList.remove('active'); });
+      document.querySelectorAll('.mp-panel').forEach(function (p) { p.classList.remove('active'); });
+      item.classList.add('active');
+      const panelId = 'panel-' + item.dataset.panel;
+      const panel = document.getElementById(panelId);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadMypage);
+  } else {
+    loadMypage();
+  }
+})();
+</script>
+</body>
+</html>
