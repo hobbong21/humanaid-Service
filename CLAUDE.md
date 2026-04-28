@@ -50,3 +50,10 @@
 | 2026-04-28 | 네트워크 상태 감지 — 오프라인/온라인 토스트 알림 | frontend | 오케스트레이터 큐 #17 자율 실행 |
 | 2026-04-28 | 접근성 스킵 링크 — Tab키로 '본문으로 바로 가기' 링크 | frontend | 오케스트레이터 큐 #18 자율 실행 |
 | 2026-04-28 | 페이지 전환 fade — 링크 클릭 시 0.2s 페이드 아웃 전환 | frontend | 오케스트레이터 큐 #19 자율 실행 |
+| 2026-04-28 | 비밀번호 변경 API — POST /api/auth/change-password (bcrypt 재해싱) | backend | 하네스 backend.md 아이디어 |
+| 2026-04-28 | 비밀번호 변경 UI — 마이페이지 계정설정 패널 폼 추가 | frontend | 하네스 frontend.md 아이디어 |
+| 2026-04-28 | 아티클 날짜 표시 — 10개 아티클 카드 발행일 (YYYY.MM.DD) 추가 | frontend | 하네스 content.md 아이디어 |
+| 2026-04-28 | 관련 아티클 추천 섹션 — index.html Editor's Picks 3카드 그리드 | frontend | 하네스 content.md 아이디어 |
+| 2026-04-28 | 무한 스크롤 로딩 스피너 — 텍스트 → CSS SVG 스피너 교체 | frontend | 하네스 frontend.md 아이디어 |
+| 2026-04-28 | Field Note 3편 신규 추가 — 유리아·민가람·이주연 (4/28 날짜) | content | 하네스 content-ops.md 아이디어 |
+| 2026-04-28 | DB 인덱스 6개 추가 — scraps·likes·subscribers·applications·users 성능 최적화 | backend | 하네스 db-ops.md 아이디어 |

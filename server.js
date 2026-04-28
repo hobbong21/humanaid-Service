@@ -97,6 +97,12 @@ async function initDB() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_scraps_user_id ON scraps(user_id)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_scraps_item_key ON scraps(item_key)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_likes_item_key ON likes(item_key)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscribers_created ON newsletter_subscribers(created_at DESC)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_applications_created ON applications(created_at DESC)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
   console.log('DB 초기화 완료');
 }
 
@@ -151,6 +157,25 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ success: true, user: { id: user.id, email: user.email, nickname: user.nickname } });
   } catch (err) {
     console.error('로그인 오류:', err);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+app.post('/api/auth/change-password', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: '로그인이 필요합니다.' });
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) return res.status(400).json({ error: '현재 비밀번호와 새 비밀번호를 입력해주세요.' });
+  if (newPassword.length < 6) return res.status(400).json({ error: '새 비밀번호는 6자 이상이어야 합니다.' });
+  try {
+    const result = await pool.query('SELECT password_hash FROM users WHERE id=$1', [req.session.userId]);
+    if (!result.rows.length) return res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+    const match = await bcrypt.compare(currentPassword, result.rows[0].password_hash);
+    if (!match) return res.status(401).json({ error: '현재 비밀번호가 올바르지 않습니다.' });
+    const newHash = await bcrypt.hash(newPassword, 12);
+    await pool.query('UPDATE users SET password_hash=$1 WHERE id=$2', [newHash, req.session.userId]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('비밀번호 변경 오류:', err);
     res.status(500).json({ error: '서버 오류가 발생했습니다.' });
   }
 });

@@ -318,6 +318,25 @@
               <div class="val">매주 금요일 아침</div>
             </div>
           </div>
+          <div class="mp-setting-block">
+            <h4>비밀번호 변경</h4>
+            <form id="changePwForm" autocomplete="off">
+              <div class="mp-field">
+                <label for="cpCurrent">현재 비밀번호</label>
+                <input type="password" id="cpCurrent" placeholder="현재 비밀번호" style="width:100%;max-width:360px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:5px;font-family:var(--sans);font-size:14px;background:var(--surface);color:var(--ink);outline:none;" />
+              </div>
+              <div class="mp-field">
+                <label for="cpNew">새 비밀번호 (6자 이상)</label>
+                <input type="password" id="cpNew" placeholder="새 비밀번호" style="width:100%;max-width:360px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:5px;font-family:var(--sans);font-size:14px;background:var(--surface);color:var(--ink);outline:none;" />
+              </div>
+              <div class="mp-field">
+                <label for="cpConfirm">새 비밀번호 확인</label>
+                <input type="password" id="cpConfirm" placeholder="새 비밀번호 재입력" style="width:100%;max-width:360px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:5px;font-family:var(--sans);font-size:14px;background:var(--surface);color:var(--ink);outline:none;" />
+              </div>
+              <div id="cpMsg" style="font-size:13px;margin-bottom:10px;min-height:18px;"></div>
+              <button type="submit" style="background:var(--ink);color:#fff;border:none;padding:11px 26px;border-radius:5px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;">비밀번호 변경</button>
+            </form>
+          </div>
         </div>
       </main>
     </div>
@@ -455,6 +474,39 @@
       if (panel) panel.classList.add('active');
     });
   });
+
+  const cpForm = document.getElementById('changePwForm');
+  if (cpForm) {
+    cpForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const msg = document.getElementById('cpMsg');
+      const cur = document.getElementById('cpCurrent').value;
+      const nw = document.getElementById('cpNew').value;
+      const cf = document.getElementById('cpConfirm').value;
+      if (!cur || !nw || !cf) { msg.style.color = '#B8412A'; msg.textContent = '모든 항목을 입력해주세요.'; return; }
+      if (nw !== cf) { msg.style.color = '#B8412A'; msg.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
+      if (nw.length < 6) { msg.style.color = '#B8412A'; msg.textContent = '새 비밀번호는 6자 이상이어야 합니다.'; return; }
+      try {
+        const res = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword: cur, newPassword: nw })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.style.color = '#2F855A';
+          msg.textContent = '비밀번호가 성공적으로 변경되었습니다.';
+          cpForm.reset();
+        } else {
+          msg.style.color = '#B8412A';
+          msg.textContent = data.error || '변경에 실패했습니다.';
+        }
+      } catch (err) {
+        msg.style.color = '#B8412A';
+        msg.textContent = '네트워크 오류가 발생했습니다.';
+      }
+    });
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadMypage);
