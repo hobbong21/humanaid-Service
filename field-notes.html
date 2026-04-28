@@ -4,6 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Field Notes — 빌더의 책상에서 도착한 메모, humanaid</title>
+<meta name="description" content="정제되기 전의 날것의 기록. 엔지니어·연구자·디자이너가 실시간으로 보내는 짧은 빌더 메모 모음." />
+<meta property="og:title" content="Field Notes — humanaid" />
+<meta property="og:description" content="빌더의 책상에서 도착한 날것의 기록. 정제되기 전의 코드와 메모가 모이는 자리." />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ko_KR" />
+<link rel="alternate" type="application/rss+xml" title="humanaid RSS" href="/rss.xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -793,19 +799,19 @@
     </div>
     <div class="fn-stats">
       <div class="fn-stat">
-        <div class="n">17<span class="small">명</span></div>
+        <div class="n" data-countup="17">17<span class="small">명</span></div>
         <div class="l">활동 중인 빌더 통신원</div>
       </div>
       <div class="fn-stat">
-        <div class="n">12<span class="small">개 도시</span></div>
+        <div class="n" data-countup="12">12<span class="small">개 도시</span></div>
         <div class="l">현재 송고 거점</div>
       </div>
       <div class="fn-stat">
-        <div class="n">2,847</div>
+        <div class="n" data-countup="2847">2,847</div>
         <div class="l">누적 노트</div>
       </div>
       <div class="fn-stat">
-        <div class="n">26<span class="small">분 전</span></div>
+        <div class="n" data-countup="26">26<span class="small">분 전</span></div>
         <div class="l">마지막 업데이트</div>
       </div>
     </div>
@@ -1327,9 +1333,10 @@
     </div>
     <div class="submit-card">
       <h4>빌더 메모 보내기</h4>
-      <div class="row-input">
+      <div class="row-input" style="position:relative;">
         <label>위치</label>
-        <input type="text" placeholder="예: 판교 / 실리콘밸리" />
+        <input type="text" id="fn-location-input" placeholder="예: 판교 / 실리콘밸리" autocomplete="off" />
+        <ul id="fn-location-ac" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #ECECEC; border-top:none; border-radius:0 0 6px 6px; margin:0; padding:0; list-style:none; z-index:200; box-shadow:0 4px 16px rgba(0,0,0,.08);"></ul>
       </div>
       <div class="row-input">
         <label>메모</label>

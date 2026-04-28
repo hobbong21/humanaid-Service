@@ -4,6 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Builder Hub — 빌더의 커뮤니티, humanaid</title>
+<meta name="description" content="humanaid 빌더 커뮤니티. 멤버십, 이벤트, 사이드 프로젝트 지원, 멘토 매칭, 채용 보드." />
+<meta property="og:title" content="Builder Hub — humanaid 빌더 커뮤니티" />
+<meta property="og:description" content="당신이 만든 것이 다음 글이 됩니다. 빌더의 코드와 질문이 모이는 곳." />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ko_KR" />
+<link rel="alternate" type="application/rss+xml" title="humanaid RSS" href="/rss.xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -457,6 +463,24 @@
   .event-tag.meetup { background: rgba(31,58,46,.1); color: var(--forest); }
   .event-tag.hack { background: rgba(201,138,43,.12); color: var(--ochre); }
   .event-tag.workshop { background: var(--surface-2); color: var(--ink-soft); }
+  /* ---- Calendar view ---- */
+  .evt-cal-months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 900px) { .evt-cal-months { grid-template-columns: 1fr; } }
+  .evt-cal-month { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .evt-cal-header { display: flex; align-items: baseline; gap: 8px; padding: 16px 20px 12px; border-bottom: 1px solid var(--line); }
+  .evt-cal-mon { font-family: var(--serif); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+  .evt-cal-yr { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); letter-spacing: .1em; }
+  .evt-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 10px 12px 16px; gap: 2px; }
+  .evt-cal-dow { font-family: var(--mono); font-size: 9px; color: var(--ink-mute); text-align: center; letter-spacing: .08em; padding: 4px 0; }
+  .evt-cal-day { font-family: var(--mono); font-size: 11px; text-align: center; padding: 5px 2px 4px; border-radius: 4px; color: var(--ink-soft); min-height: 38px; }
+  .evt-cal-day.e { color: transparent; }
+  .evt-cal-day.evt-has-event { position: relative; background: transparent; }
+  .evt-cal-day.evt-has-event span { display: inline-block; width: 24px; height: 24px; line-height: 24px; border-radius: 50%; font-weight: 700; color: #fff; }
+  .evt-cal-day.evt-has-event.demo span { background: var(--terra); }
+  .evt-cal-day.evt-has-event.meetup span { background: var(--forest); }
+  .evt-cal-day.evt-has-event.hack span { background: var(--ochre); }
+  .evt-cal-day.evt-has-event.workshop span { background: #666; }
+  .evt-dot-label { font-size: 8px; font-family: var(--mono); letter-spacing: .04em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-soft); }
   .event-cta {
     font-family: var(--mono); font-size: 11px;
     color: var(--ink); font-weight: 600;
@@ -805,19 +829,19 @@
 <section class="bh-stats">
   <div class="wrap stats-grid">
     <div class="stat-cell">
-      <div class="n">1,247<span class="small">명</span></div>
+      <div class="n" data-countup="1247">1,247<span class="small">명</span></div>
       <div class="l">활성 빌더 멤버</div>
     </div>
     <div class="stat-cell">
-      <div class="n">380<span class="small">개</span></div>
+      <div class="n" data-countup="380">380<span class="small">개</span></div>
       <div class="l">진행 중인 빌더 프로젝트</div>
     </div>
     <div class="stat-cell">
-      <div class="n">47<span class="small">개</span></div>
+      <div class="n" data-countup="47">47<span class="small">개</span></div>
       <div class="l">올해 지원된 사이드 프로젝트</div>
     </div>
     <div class="stat-cell">
-      <div class="n">38<span class="small">명</span></div>
+      <div class="n" data-countup="38">38<span class="small">명</span></div>
       <div class="l">매칭 가능한 멘토</div>
     </div>
   </div>
@@ -1063,9 +1087,15 @@
         <h2>이번 달, <em>오프라인에서도 만나요.</em></h2>
         <p class="desc">데모 데이, 미팅업, 해커톤, 워크숍. 모든 이벤트는 멤버에게 우선 신청권이 주어지며, 비멤버는 잔여 좌석에서 참여할 수 있습니다.</p>
       </div>
-      <a href="#" class="more">전체 캘린더 →</a>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div id="event-view-toggle" style="display:flex; border:1px solid var(--line-strong); border-radius:6px; overflow:hidden; font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.08em;">
+          <button class="evt-toggle-btn active" data-view="list" style="padding:7px 14px; background:#111; color:#fff; border:none; cursor:pointer; transition:all .15s;">LIST</button>
+          <button class="evt-toggle-btn" data-view="cal" style="padding:7px 14px; background:#fff; color:var(--ink-soft); border:none; cursor:pointer; transition:all .15s;">CAL</button>
+        </div>
+        <a href="#" class="more" style="margin-left:6px;">전체 캘린더 →</a>
+      </div>
     </div>
-    <div class="event-list">
+    <div id="event-list-view" class="event-list">
       <div class="event-row">
         <div class="event-date">
           <div class="month">May</div>
@@ -1160,6 +1190,45 @@
         </div>
         <span class="event-tag meetup">Meetup</span>
         <a class="event-cta">초대 요청</a>
+      </div>
+    </div>
+    <!-- 캘린더 뷰 -->
+    <div id="event-cal-view" style="display:none; margin-top:4px;">
+      <div class="evt-cal-months">
+        <div class="evt-cal-month">
+          <div class="evt-cal-header"><span class="evt-cal-mon">May</span><span class="evt-cal-yr">2026</span></div>
+          <div class="evt-cal-grid">
+            <div class="evt-cal-dow">Sun</div><div class="evt-cal-dow">Mon</div><div class="evt-cal-dow">Tue</div><div class="evt-cal-dow">Wed</div><div class="evt-cal-dow">Thu</div><div class="evt-cal-dow">Fri</div><div class="evt-cal-dow">Sat</div>
+            <div class="evt-cal-day e"></div><div class="evt-cal-day e"></div><div class="evt-cal-day e"></div><div class="evt-cal-day e"></div><div class="evt-cal-day e"></div><!-- May1=Fri --><div class="evt-cal-day">1</div><div class="evt-cal-day">2</div>
+            <div class="evt-cal-day">3</div><div class="evt-cal-day">4</div><div class="evt-cal-day">5</div><div class="evt-cal-day">6</div><div class="evt-cal-day">7</div><div class="evt-cal-day">8</div><div class="evt-cal-day">9</div>
+            <div class="evt-cal-day">10</div><div class="evt-cal-day">11</div><div class="evt-cal-day">12</div><div class="evt-cal-day">13</div><div class="evt-cal-day">14</div><div class="evt-cal-day">15</div><div class="evt-cal-day">16</div>
+            <div class="evt-cal-day">17</div><div class="evt-cal-day evt-has-event demo"><span>18</span><div class="evt-dot-label">Demo Day</div></div><div class="evt-cal-day">19</div><div class="evt-cal-day">20</div><div class="evt-cal-day">21</div><div class="evt-cal-day">22</div><div class="evt-cal-day">23</div>
+            <div class="evt-cal-day">24</div><div class="evt-cal-day">25</div><div class="evt-cal-day">26</div><div class="evt-cal-day">27</div><div class="evt-cal-day">28</div><div class="evt-cal-day">29</div><div class="evt-cal-day">30</div>
+            <div class="evt-cal-day">31</div>
+          </div>
+        </div>
+        <div class="evt-cal-month">
+          <div class="evt-cal-header"><span class="evt-cal-mon">Jun</span><span class="evt-cal-yr">2026</span></div>
+          <div class="evt-cal-grid">
+            <div class="evt-cal-dow">Sun</div><div class="evt-cal-dow">Mon</div><div class="evt-cal-dow">Tue</div><div class="evt-cal-dow">Wed</div><div class="evt-cal-dow">Thu</div><div class="evt-cal-dow">Fri</div><div class="evt-cal-dow">Sat</div>
+            <div class="evt-cal-day e"></div><div class="evt-cal-day">1</div><div class="evt-cal-day">2</div><div class="evt-cal-day">3</div><div class="evt-cal-day">4</div><div class="evt-cal-day evt-has-event meetup"><span>5</span><div class="evt-dot-label">Meetup #14</div></div><div class="evt-cal-day">6</div>
+            <div class="evt-cal-day">7</div><div class="evt-cal-day">8</div><div class="evt-cal-day">9</div><div class="evt-cal-day">10</div><div class="evt-cal-day">11</div><div class="evt-cal-day">12</div><div class="evt-cal-day">13</div>
+            <div class="evt-cal-day">14</div><div class="evt-cal-day">15</div><div class="evt-cal-day">16</div><div class="evt-cal-day">17</div><div class="evt-cal-day">18</div><div class="evt-cal-day">19</div><div class="evt-cal-day">20</div>
+            <div class="evt-cal-day">21</div><div class="evt-cal-day evt-has-event hack"><span>22</span><div class="evt-dot-label">Hackathon</div></div><div class="evt-cal-day">23</div><div class="evt-cal-day">24</div><div class="evt-cal-day">25</div><div class="evt-cal-day">26</div><div class="evt-cal-day">27</div>
+            <div class="evt-cal-day">28</div><div class="evt-cal-day">29</div><div class="evt-cal-day">30</div>
+          </div>
+        </div>
+        <div class="evt-cal-month">
+          <div class="evt-cal-header"><span class="evt-cal-mon">Jul</span><span class="evt-cal-yr">2026</span></div>
+          <div class="evt-cal-grid">
+            <div class="evt-cal-dow">Sun</div><div class="evt-cal-dow">Mon</div><div class="evt-cal-dow">Tue</div><div class="evt-cal-dow">Wed</div><div class="evt-cal-dow">Thu</div><div class="evt-cal-dow">Fri</div><div class="evt-cal-dow">Sat</div>
+            <div class="evt-cal-day e"></div><div class="evt-cal-day e"></div><div class="evt-cal-day e"></div><!-- Jul1=Wed --><div class="evt-cal-day">1</div><div class="evt-cal-day">2</div><div class="evt-cal-day">3</div><div class="evt-cal-day">4</div>
+            <div class="evt-cal-day">5</div><div class="evt-cal-day">6</div><div class="evt-cal-day">7</div><div class="evt-cal-day">8</div><div class="evt-cal-day">9</div><div class="evt-cal-day">10</div><div class="evt-cal-day">11</div>
+            <div class="evt-cal-day evt-has-event workshop"><span>12</span><div class="evt-dot-label">Workshop</div></div><div class="evt-cal-day">13</div><div class="evt-cal-day">14</div><div class="evt-cal-day">15</div><div class="evt-cal-day">16</div><div class="evt-cal-day">17</div><div class="evt-cal-day">18</div>
+            <div class="evt-cal-day">19</div><div class="evt-cal-day">20</div><div class="evt-cal-day">21</div><div class="evt-cal-day">22</div><div class="evt-cal-day">23</div><div class="evt-cal-day">24</div><div class="evt-cal-day">25</div>
+            <div class="evt-cal-day">26</div><div class="evt-cal-day">27</div><div class="evt-cal-day">28</div><div class="evt-cal-day evt-has-event meetup"><span>29</span><div class="evt-dot-label">Salon</div></div><div class="evt-cal-day">30</div><div class="evt-cal-day">31</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

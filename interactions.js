@@ -802,6 +802,220 @@
     if (headerRight) headerRight.prepend(btn);
   }
 
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     읽기 진행 바 (전 페이지 공통)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initReadingProgress() {
+    const bar = document.createElement('div');
+    bar.id = 'ha-progress';
+    const s = document.createElement('style');
+    s.textContent = '#ha-progress{position:fixed;top:0;left:0;width:0%;height:3px;background:var(--terra,#B8412A);z-index:10000;transition:width .1s linear;pointer-events:none;}body.dark-mode #ha-progress{background:#d45a40;}';
+    document.head.appendChild(s);
+    document.body.prepend(bar);
+    function update() {
+      const doc = document.documentElement;
+      const scrolled = doc.scrollTop || document.body.scrollTop;
+      const total = doc.scrollHeight - doc.clientHeight;
+      bar.style.width = (total > 0 ? Math.min(100, (scrolled / total) * 100) : 0) + '%';
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     맨 위로 버튼 (전 페이지 공통)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initBackToTop() {
+    const btn = document.createElement('button');
+    btn.id = 'ha-backtop';
+    btn.innerHTML = '&#8679;';
+    btn.title = '맨 위로';
+    const s = document.createElement('style');
+    s.textContent = '#ha-backtop{position:fixed;bottom:32px;right:28px;width:40px;height:40px;border-radius:50%;border:1px solid #ddd;background:#fff;color:#111;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.1);opacity:0;transform:translateY(10px);transition:opacity .25s,transform .25s,background .15s;z-index:8000;display:flex;align-items:center;justify-content:center;}#ha-backtop.visible{opacity:1;transform:translateY(0);}#ha-backtop:hover{background:#111;color:#fff;border-color:#111;}body.dark-mode #ha-backtop{background:#222;color:#fff;border-color:#444;}body.dark-mode #ha-backtop:hover{background:#B8412A;border-color:#B8412A;}';
+    document.head.appendChild(s);
+    document.body.appendChild(btn);
+    function onScroll() { btn.classList.toggle('visible', window.scrollY > 300); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    btn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     아티클 공유 버튼 (index.html)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initShareButtons() {
+    const rows = document.querySelectorAll('.article-row');
+    if (!rows.length) return;
+    const s = document.createElement('style');
+    s.textContent = '.ar-share{background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink-mute,#9A9A9A);padding:0 0 0 12px;font-family:\'Noto Sans KR\',sans-serif;font-weight:500;transition:color .15s;white-space:nowrap;}.ar-share:hover{color:var(--terra,#B8412A);}';
+    document.head.appendChild(s);
+    rows.forEach(function (row) {
+      const authorLine = row.querySelector('.author-line');
+      if (!authorLine) return;
+      const shareBtn = document.createElement('button');
+      shareBtn.className = 'ar-share';
+      shareBtn.textContent = '⎘ 공유';
+      shareBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const title = row.querySelector('h3') ? row.querySelector('h3').textContent.trim() : document.title;
+        const url = window.location.href.split('?')[0] + '?article=' + encodeURIComponent(title.slice(0, 30));
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(url).then(function () { toast('링크가 복사되었습니다.', 'success'); }).catch(function () { toast('링크: ' + url); });
+        } else {
+          toast('공유 링크 복사를 지원하지 않는 브라우저입니다.');
+        }
+      });
+      authorLine.appendChild(shareBtn);
+    });
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     숫자 카운트업 애니메이션
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initCountUp() {
+    const els = document.querySelectorAll('[data-countup]');
+    if (!els.length) return;
+    function animateCount(el) {
+      if (el.dataset.counted) return;
+      el.dataset.counted = '1';
+      const target = parseInt(el.dataset.countup, 10);
+      if (isNaN(target) || target === 0) return;
+      const textNode = el.firstChild;
+      if (!textNode || textNode.nodeType !== 3) return;
+      const start = Date.now();
+      const dur = Math.min(1400, Math.max(600, target * 0.5));
+      function tick() {
+        const elapsed = Date.now() - start;
+        const pct = Math.min(1, elapsed / dur);
+        const ease = 1 - Math.pow(1 - pct, 3);
+        const val = Math.round(ease * target);
+        textNode.nodeValue = val.toLocaleString('ko-KR');
+        if (pct < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) animateCount(e.target); });
+    }, { threshold: 0.5 });
+    els.forEach(function (el) { obs.observe(el); });
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     무한 스크롤 (index.html 아티클)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initInfiniteScroll() {
+    const sentinel = document.getElementById('article-sentinel');
+    if (!sentinel) return;
+    const hidden = Array.from(document.querySelectorAll('.article-hidden'));
+    if (!hidden.length) { document.getElementById('article-end').style.display = 'block'; return; }
+    let loading = false;
+    const loading$el = document.getElementById('article-loading');
+    const end$el = document.getElementById('article-end');
+    const BATCH = 2;
+    let cursor = 0;
+
+    function revealBatch() {
+      if (loading || cursor >= hidden.length) return;
+      loading = true;
+      if (loading$el) loading$el.style.display = 'block';
+      setTimeout(function () {
+        const batch = hidden.slice(cursor, cursor + BATCH);
+        batch.forEach(function (el, i) {
+          el.classList.remove('article-hidden');
+          el.classList.add('article-reveal');
+          el.style.animationDelay = (i * 80) + 'ms';
+        });
+        cursor += BATCH;
+        if (loading$el) loading$el.style.display = 'none';
+        if (cursor >= hidden.length) {
+          if (end$el) end$el.style.display = 'block';
+          observer.disconnect();
+        }
+        loading = false;
+      }, 600);
+    }
+
+    const observer = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) revealBatch();
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     소셜 로그인 플레이스홀더
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initSocialLoginButtons() {
+    const ids = ['haGoogleLoginBtn','haGithubLoginBtn','haGoogleSignupBtn','haGithubSignupBtn'];
+    ids.forEach(function (id) {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        const provider = id.includes('Google') ? 'Google' : 'GitHub';
+        toast(provider + ' 로그인은 준비 중입니다. 이메일로 가입해주세요.', 'info');
+      });
+    });
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     위치 자동완성 (field-notes.html)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initLocationAutocomplete() {
+    const input = document.getElementById('fn-location-input');
+    const list = document.getElementById('fn-location-ac');
+    if (!input || !list) return;
+    const LOCATIONS = ['판교','강남','한남동','성수','홍대','종로','서울','실리콘밸리','SF','샌프란시스코','뉴욕','보스턴','시애틀','LA','도쿄','오사카','베이징','상하이','선전','싱가포르','방갈로르','텔아비브','런던','베를린','암스테르담','파리'];
+
+    function renderSuggestions(q) {
+      const matches = LOCATIONS.filter(function (l) { return l.toLowerCase().startsWith(q.toLowerCase()); }).slice(0, 6);
+      if (!matches.length || !q) { list.style.display = 'none'; return; }
+      list.innerHTML = matches.map(function (m) {
+        return '<li style="padding:9px 14px; font-size:13px; font-family:\'Noto Sans KR\',sans-serif; cursor:pointer; border-bottom:1px solid #F5F5F4; transition:background .1s;" onmouseover="this.style.background=\'#F8F8F8\'" onmouseout="this.style.background=\'\'"><span style="color:#B8412A; font-weight:600;">' + m.slice(0, q.length) + '</span>' + m.slice(q.length) + '</li>';
+      }).join('');
+      list.querySelectorAll('li').forEach(function (li, i) {
+        li.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          input.value = matches[i];
+          list.style.display = 'none';
+        });
+      });
+      list.style.display = 'block';
+    }
+
+    input.addEventListener('input', function () { renderSuggestions(input.value); });
+    input.addEventListener('keydown', function (e) { if (e.key === 'Escape') list.style.display = 'none'; });
+    input.addEventListener('blur', function () { setTimeout(function () { list.style.display = 'none'; }, 150); });
+    input.addEventListener('focus', function () { if (input.value) renderSuggestions(input.value); });
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     이벤트 캘린더 뷰 토글
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initEventCalendar() {
+    const toggleWrap = document.getElementById('event-view-toggle');
+    const listView = document.getElementById('event-list-view');
+    const calView = document.getElementById('event-cal-view');
+    if (!toggleWrap || !listView || !calView) return;
+    toggleWrap.querySelectorAll('.evt-toggle-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const view = btn.dataset.view;
+        toggleWrap.querySelectorAll('.evt-toggle-btn').forEach(function (b) {
+          b.style.background = '#fff';
+          b.style.color = 'var(--ink-soft)';
+          b.classList.remove('active');
+        });
+        btn.style.background = '#111';
+        btn.style.color = '#fff';
+        btn.classList.add('active');
+        if (view === 'list') {
+          listView.style.display = '';
+          calView.style.display = 'none';
+        } else {
+          listView.style.display = 'none';
+          calView.style.display = '';
+        }
+      });
+    });
+  }
+
   function init() {
     initSearch();
     initDarkMode();
@@ -818,6 +1032,189 @@
     initVoiceMemo();
     initNoteSubmitForm();
     initAnchorLinks();
+    initInfiniteScroll();
+    initSocialLoginButtons();
+    initLocationAutocomplete();
+    initEventCalendar();
+    initReadingProgress();
+    initBackToTop();
+    initShareButtons();
+    initCountUp();
+    initMobileMenu();
+    initRssLinks();
+    initNetworkStatus();
+    initSkipLink();
+    initPageFade();
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     모바일 햄버거 메뉴
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initMobileMenu() {
+    const header = document.querySelector('header.main');
+    if (!header) return;
+    const nav = header.querySelector('nav.primary');
+    const hRight = header.querySelector('.header-right');
+    if (!nav) return;
+
+    const s = document.createElement('style');
+    s.textContent = `
+      #ha-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--ink, #111); }
+      #ha-hamburger svg { display: block; }
+      #ha-mobile-menu {
+        display: none; position: fixed; top: 0; right: 0; bottom: 0; width: 300px; max-width: 90vw;
+        background: #fff; z-index: 9500; box-shadow: -4px 0 32px rgba(0,0,0,.15);
+        flex-direction: column; overflow-y: auto;
+        animation: ha-slide-in .25s ease;
+      }
+      #ha-mobile-menu.open { display: flex; }
+      @keyframes ha-slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+      #ha-mobile-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:9400; }
+      #ha-mobile-overlay.open { display:block; }
+      #ha-mobile-menu .mm-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid #eee; }
+      #ha-mobile-menu .mm-logo { font-family:'Noto Serif KR',serif; font-size:18px; font-weight:700; color:#111; }
+      #ha-mobile-menu .mm-logo span { color:#B8412A; }
+      #ha-mobile-menu .mm-close { background:none; border:none; font-size:24px; cursor:pointer; color:#999; line-height:1; padding:0; }
+      #ha-mobile-menu .mm-close:hover { color:#111; }
+      #ha-mobile-menu nav a { display:block; padding:14px 24px; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:500; color:#333; border-bottom:1px solid #f5f5f5; transition:background .12s; }
+      #ha-mobile-menu nav a:hover { background:#f8f8f8; color:#B8412A; }
+      #ha-mobile-menu .mm-actions { padding:20px 24px; display:flex; gap:10px; }
+      #ha-mobile-menu .mm-actions a { flex:1; text-align:center; padding:11px 8px; font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; border-radius:4px; }
+      #ha-mobile-menu .mm-login { border:1px solid #ddd; color:#333; }
+      #ha-mobile-menu .mm-signup { background:#111; color:#fff; }
+      #ha-mobile-menu .mm-signup:hover { background:#B8412A; }
+      body.dark-mode #ha-mobile-menu { background:#1a1a1a; }
+      body.dark-mode #ha-mobile-menu nav a { color:#ccc; border-bottom-color:#2a2a2a; }
+      body.dark-mode #ha-mobile-menu .mm-logo { color:#eee; }
+      body.dark-mode #ha-mobile-menu .mm-actions .mm-login { border-color:#444; color:#ccc; }
+      body.dark-mode #ha-mobile-menu .mm-actions .mm-signup { background:#B8412A; }
+      @media (max-width: 820px) {
+        #ha-hamburger { display: block; }
+        header.main nav.primary { display: none !important; }
+        header.main .header-right .ad,
+        header.main .header-right .author,
+        header.main .header-right .login,
+        header.main .header-right .signup,
+        header.main .header-right .ha-mypage-btn { display: none !important; }
+      }
+    `;
+    document.head.appendChild(s);
+
+    const hamburger = document.createElement('button');
+    hamburger.id = 'ha-hamburger';
+    hamburger.setAttribute('aria-label', '메뉴 열기');
+    hamburger.innerHTML = '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><line x1="3" y1="6" x2="19" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="3" y1="11" x2="19" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="3" y1="16" x2="19" y2="16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    header.querySelector('.row').appendChild(hamburger);
+
+    const overlay = document.createElement('div');
+    overlay.id = 'ha-mobile-overlay';
+    const menu = document.createElement('div');
+    menu.id = 'ha-mobile-menu';
+    menu.innerHTML = `
+      <div class="mm-header">
+        <div class="mm-logo">humanaid<span>.</span></div>
+        <button class="mm-close">×</button>
+      </div>
+      <nav>
+        <a href="/">매거진</a>
+        <a href="/field-notes.html">필드 노트</a>
+        <a href="/builder-hub.html">빌더 허브</a>
+        <a href="#">컬렉션</a>
+        <a href="#">물어봐 AI</a>
+        <a href="#">데이터룸</a>
+        <a href="#">빌더 작가들</a>
+        <a href="/admin.html">관리자</a>
+        <a href="/rss.xml" target="_blank">RSS 구독</a>
+      </nav>
+      <div class="mm-actions">
+        <a href="#" class="mm-login" id="mm-login-btn">로그인</a>
+        <a href="#" class="mm-signup" id="mm-signup-btn">회원가입</a>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.body.appendChild(menu);
+
+    function openMenu() { menu.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeMenu() { menu.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    hamburger.addEventListener('click', openMenu);
+    menu.querySelector('.mm-close').addEventListener('click', closeMenu);
+    overlay.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+
+    const loginBtns = header.querySelectorAll('.login');
+    menu.querySelector('#mm-login-btn').addEventListener('click', function (e) {
+      e.preventDefault(); closeMenu();
+      if (loginBtns.length) loginBtns[0].click();
+    });
+    const signupBtns = header.querySelectorAll('.signup');
+    menu.querySelector('#mm-signup-btn').addEventListener('click', function (e) {
+      e.preventDefault(); closeMenu();
+      if (signupBtns.length) signupBtns[0].click();
+    });
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     RSS 링크 업데이트
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initRssLinks() {
+    document.querySelectorAll('a').forEach(function (a) {
+      if (a.textContent.trim() === '매거진 RSS' || a.textContent.trim() === 'RSS') {
+        a.href = '/rss.xml';
+        a.target = '_blank';
+        a.rel = 'noopener';
+      }
+    });
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     네트워크 오프라인/온라인 감지
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initNetworkStatus() {
+    function onOffline() { toast('인터넷 연결이 끊겼습니다.', 'error'); }
+    function onOnline() { toast('인터넷 연결이 복원되었습니다.', 'success'); }
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     접근성 — 스킵 내비게이션 링크
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initSkipLink() {
+    const main = document.querySelector('main, section, .articles, .fn-main, .bh-section, .hero');
+    if (!main) return;
+    if (!main.id) main.id = 'ha-main-content';
+    const skip = document.createElement('a');
+    skip.href = '#' + main.id;
+    skip.textContent = '본문으로 바로 가기';
+    skip.className = 'ha-skip-link';
+    const s = document.createElement('style');
+    s.textContent = '.ha-skip-link{position:absolute;top:-999px;left:8px;background:#B8412A;color:#fff;padding:8px 18px;font-family:\'Noto Sans KR\',sans-serif;font-size:14px;font-weight:600;border-radius:0 0 4px 4px;z-index:99999;text-decoration:none;}.ha-skip-link:focus{top:0;}';
+    document.head.appendChild(s);
+    document.body.prepend(skip);
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     페이지 전환 fade 효과
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initPageFade() {
+    const s = document.createElement('style');
+    s.textContent = 'body{animation:ha-page-in .3s ease both;} @keyframes ha-page-in{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}';
+    document.head.appendChild(s);
+    document.querySelectorAll('a[href]').forEach(function (a) {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript') || href.startsWith('mailto') || a.target === '_blank') return;
+      a.addEventListener('click', function (e) {
+        const target = a.href;
+        if (target && target !== window.location.href) {
+          e.preventDefault();
+          document.body.style.animation = 'none';
+          document.body.style.opacity = '1';
+          document.body.style.transition = 'opacity .2s ease';
+          setTimeout(function () { document.body.style.opacity = '0'; }, 10);
+          setTimeout(function () { window.location.href = target; }, 220);
+        }
+      });
+    });
   }
 
   if (document.readyState === 'loading') {

@@ -4,6 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>사람과 AI, 디지털을 잇는 기술 매거진, humanaid</title>
+<meta name="description" content="AI·반도체·로보틱스 분야 빌더를 위한 한국어 기술 매거진. 주간 인사이트, 필드 노트, 빌더 커뮤니티를 제공합니다." />
+<meta name="keywords" content="AI, 반도체, 로보틱스, 기술 매거진, 빌더, 인공지능, 스타트업" />
+<meta property="og:title" content="humanaid — AI·반도체·로보틱스 기술 매거진" />
+<meta property="og:description" content="사람과 AI, 디지털을 잇는 기술 매거진. 매주 빌더를 위한 인사이트를 담습니다." />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="ko_KR" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="humanaid — AI·반도체·로보틱스 기술 매거진" />
+<meta name="twitter:description" content="사람과 AI, 디지털을 잇는 기술 매거진. 매주 빌더를 위한 인사이트를 담습니다." />
+<link rel="alternate" type="application/rss+xml" title="humanaid RSS" href="/rss.xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -186,6 +196,9 @@
 
   .articles { padding: 32px 0 80px; border-top: 1px solid var(--line); margin-top: 24px; background: var(--bg); }
   .article-list { display: flex; flex-direction: column; }
+  .article-hidden { display: none; }
+  .article-row.article-reveal { animation: ar-fade-in .35s ease both; }
+  @keyframes ar-fade-in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
   .article-row { display: grid; grid-template-columns: 50px 1fr 240px; gap: 28px; align-items: center; padding: 28px 0; border-bottom: 1px solid var(--line); cursor: pointer; transition: background .15s; }
   .article-row:hover { background: rgba(184,65,42,.025); }
   .ar-rank { font-family: var(--serif); font-weight: 700; font-size: 36px; color: var(--ink); line-height: 1; letter-spacing: -0.04em; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -563,7 +576,50 @@
         </div>
         <div class="ar-thumb pat-3"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="none" stroke="rgba(201,138,43,0.7)" stroke-width="1"><path d="M30,120 L60,80 L90,110 L120,60 L150,90 L180,50 L210,80"/><path d="M30,140 L60,100 L90,130 L120,80 L150,110 L180,70 L210,100" stroke="rgba(255,255,255,0.4)"/></g><text x="50%" y="30%" text-anchor="middle" font-family="Noto Serif KR" font-size="20" font-weight="700" fill="rgba(255,255,255,0.85)">72 hours</text></svg></div>
       </article>
+      <article class="article-row article-hidden">
+        <div class="ar-rank"><span class="badge-num">7</span></div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">반도체</span><span class="min">11분</span></div>
+          <h3>HBM4 양산 경쟁: SK하이닉스 vs 삼성, 기술 격차의 실체</h3>
+          <p>엔비디아 B100·B200 수요를 잡기 위한 HBM4 레이스가 본격화됐다. 양산 수율·전력 효율·단가 세 가지 축에서 두 회사의 현재 위치를 정확히 진단한다.</p>
+          <div class="author-line"><div class="av d">KS</div><span class="nm">김세준 · 반도체 공정 엔지니어</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-4"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"><rect x="30" y="30" width="180" height="90" rx="4"/><line x1="30" y1="60" x2="210" y2="60"/><line x1="30" y1="90" x2="210" y2="90"/><line x1="90" y1="30" x2="90" y2="120"/><line x1="150" y1="30" x2="150" y2="120"/></g><text x="50%" y="52%" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="rgba(255,255,255,0.7)" letter-spacing="0.12em">HBM4 · 2026</text></svg></div>
+      </article>
+      <article class="article-row article-hidden">
+        <div class="ar-rank"><span class="badge-num">8</span></div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">AI 정책</span><span class="min">8분</span><span class="pop">인기</span></div>
+          <h3>EU AI Act 시행 6개월: 한국 기업이 실제로 부딪힌 것들</h3>
+          <p>2024년 발효, 2025년 전면 시행된 EU AI Act 속에서 한국 AI 스타트업 7곳의 유럽 진출기를 정리했다. 규정 준수 비용, 예상 밖의 장벽, 그리고 실질적인 기회.</p>
+          <div class="author-line"><div class="av">HY</div><span class="nm">한유진 · 정책 애널리스트</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-5"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="rgba(201,138,43,0.5)"><circle cx="60" cy="75" r="28"/><circle cx="120" cy="75" r="28"/><circle cx="180" cy="75" r="28"/></g><text x="50%" y="85%" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="rgba(255,255,255,0.7)" letter-spacing="0.1em">EU AI ACT</text></svg></div>
+      </article>
+      <article class="article-row article-hidden">
+        <div class="ar-rank"><span class="badge-num">9</span></div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">AI 에이전트</span><span class="min">14분</span></div>
+          <h3>에이전트 시대 개막: 오케스트레이터·서브에이전트·툴콜의 실전 구조</h3>
+          <p>GPT-4o와 Claude 3.7이 에이전트 프레임워크의 표준으로 자리잡는 과정을 실제 프로덕션 코드베이스 5개를 열어 분석한다. 패턴, 함정, 그리고 비용.</p>
+          <div class="author-line"><div class="av b">OH</div><span class="nm">오현석 · AI 시스템 아키텍트</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-6"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"><circle cx="120" cy="55" r="18"/><circle cx="60" cy="110" r="14"/><circle cx="180" cy="110" r="14"/><line x1="120" y1="73" x2="60" y2="96"/><line x1="120" y1="73" x2="180" y2="96"/></g></svg></div>
+      </article>
+      <article class="article-row article-hidden">
+        <div class="ar-rank"><span class="badge-num">10</span></div>
+        <div class="ar-body">
+          <div class="ar-meta-top"><span class="cat">로보틱스</span><span class="min">9분</span></div>
+          <h3>산업용 로봇 밀도 1위 한국, 다음은 협동 로봇 전쟁</h3>
+          <p>근로자 1만 명당 로봇 수 세계 1위. 하지만 협동 로봇(코봇) 점유율은 아직 12%. 제조 현장 5곳의 코봇 도입 6개월 보고서 — 생산성, 안전, 그리고 인력 재배치.</p>
+          <div class="author-line"><div class="av c">CJ</div><span class="nm">최준영 · 스마트팩토리 컨설턴트</span><span class="scrap">+ 스크랩</span></div>
+        </div>
+        <div class="ar-thumb pat-1"><svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid slice"><rect width="240" height="150" fill="url(#grain)"/><g fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"><rect x="85" y="20" width="70" height="50" rx="6"/><rect x="100" y="70" width="40" height="30"/><rect x="70" y="100" width="30" height="40"/><rect x="140" y="100" width="30" height="40"/><line x1="120" y1="70" x2="120" y2="100"/></g></svg></div>
+      </article>
+      <div id="article-sentinel" style="height:1px;"></div>
     </div>
+    <div id="article-loading" style="display:none; text-align:center; padding:28px 0; font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; color:#9A9A9A;">로딩 중 ···</div>
+    <div id="article-end" style="display:none; text-align:center; padding:24px 0; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:#C0C0C0;">— 이번 호 아티클 전체 표시 완료 —</div>
   </div>
 </section>
 

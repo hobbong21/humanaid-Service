@@ -400,6 +400,40 @@ app.get('/api/search', (req, res) => {
   res.json({ results });
 });
 
+/* ─── RSS 피드 ─── */
+app.get('/rss.xml', (req, res) => {
+  const host = req.protocol + '://' + req.get('host');
+  const now = new Date().toUTCString();
+  const items = ARTICLES.filter(a => a.type === 'article').map(a => `
+    <item>
+      <title><![CDATA[${a.title}]]></title>
+      <link>${host}/${a.page || 'index.html'}</link>
+      <guid isPermaLink="false">${host}/article/${a.key}</guid>
+      <description><![CDATA[${a.summary || ''}]]></description>
+      <category>${a.category || ''}</category>
+      <author>${a.author || 'humanaid'}</author>
+      ${a.min ? `<itunes:duration>${a.min}분</itunes:duration>` : ''}
+    </item>`).join('');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>humanaid — AI·반도체·로보틱스 매거진</title>
+    <link>${host}</link>
+    <description>사람과 AI, 디지털을 잇는 기술 매거진 humanaid의 최신 아티클 피드.</description>
+    <language>ko</language>
+    <lastBuildDate>${now}</lastBuildDate>
+    <atom:link href="${host}/rss.xml" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>${host}/favicon.ico</url>
+      <title>humanaid</title>
+      <link>${host}</link>
+    </image>${items}
+  </channel>
+</rss>`;
+  res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
+  res.send(xml);
+});
+
 /* ─── STATIC FILES ─── */
 app.use(express.static(path.join(__dirname)));
 
