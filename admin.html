@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>관리자 대시보드 — humanaid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D0D0D;
+    --surface: #161616;
+    --surface-2: #1F1F1F;
+    --ink: #EFEFEF;
+    --ink-soft: #999;
+    --ink-mute: #555;
+    --line: #2A2A2A;
+    --terra: #B8412A;
+    --ochre: #C98A2B;
+    --green: #2F855A;
+    --blue: #3B5BDB;
+    --sans: 'Noto Sans KR', system-ui, sans-serif;
+    --serif: 'Noto Serif KR', serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+
+  /* 로그인 화면 */
+  .admin-login {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .login-box {
+    width: 100%; max-width: 380px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 40px 36px;
+  }
+  .login-box .brand { font-family: var(--serif); font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .login-box .brand span { color: var(--terra); }
+  .login-box p { color: var(--ink-soft); font-size: 13px; margin: 0 0 28px; }
+  .login-box label { display: block; font-size: 12px; font-weight: 500; color: var(--ink-soft); margin-bottom: 6px; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+  .login-box input {
+    display: block; width: 100%; padding: 11px 14px; font-size: 14px;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px;
+    color: var(--ink); font-family: var(--mono); outline: none; transition: border-color .15s;
+    margin-bottom: 16px;
+  }
+  .login-box input:focus { border-color: var(--terra); }
+  .login-box .login-btn {
+    width: 100%; padding: 12px; background: var(--terra); color: #fff; border: none;
+    border-radius: 5px; font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: var(--sans); transition: background .15s;
+  }
+  .login-box .login-btn:hover { background: #a0351f; }
+  .login-box .err { font-size: 13px; color: #e05c4a; margin: -8px 0 12px; display: none; font-family: var(--mono); }
+
+  /* 대시보드 레이아웃 */
+  .admin-wrap { display: none; }
+  .admin-topbar {
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    padding: 0 32px; height: 56px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 50;
+  }
+  .admin-topbar .brand { font-family: var(--serif); font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .admin-topbar .brand::after { content: "ADMIN"; font-family: var(--mono); font-size: 9px; letter-spacing: .15em; color: var(--terra); background: rgba(184,65,42,.15); padding: 2px 8px; border-radius: 999px; }
+  .admin-topbar .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .admin-topbar .home-link { font-size: 12px; color: var(--ink-soft); font-family: var(--mono); transition: color .12s; }
+  .admin-topbar .home-link:hover { color: var(--ink); }
+  .topbar-logout { background: none; border: 1px solid var(--line); color: var(--ink-soft); font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: var(--mono); transition: all .12s; }
+  .topbar-logout:hover { border-color: var(--terra); color: var(--terra); }
+
+  .admin-body { padding: 32px; max-width: 1200px; margin: 0 auto; }
+
+  /* 통계 카드 */
+  .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 36px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px 22px; }
+  .stat-card .num { font-family: var(--mono); font-size: 30px; font-weight: 500; line-height: 1; margin-bottom: 6px; }
+  .stat-card .num.terra { color: var(--terra); }
+  .stat-card .num.ochre { color: var(--ochre); }
+  .stat-card .num.green { color: var(--green); }
+  .stat-card .num.blue  { color: var(--blue); }
+  .stat-card .lbl { font-size: 11px; color: var(--ink-mute); font-family: var(--mono); text-transform: uppercase; letter-spacing: .1em; }
+  .stat-card .sub { font-size: 11px; color: var(--ink-mute); margin-top: 4px; }
+
+  /* 탭 */
+  .admin-tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .admin-tab {
+    padding: 10px 20px; font-size: 13px; font-weight: 500; cursor: pointer;
+    color: var(--ink-soft); border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all .12s; font-family: var(--mono); letter-spacing: .04em;
+  }
+  .admin-tab:hover { color: var(--ink); }
+  .admin-tab.active { color: var(--terra); border-bottom-color: var(--terra); }
+
+  /* 패널 */
+  .admin-panel { display: none; }
+  .admin-panel.active { display: block; }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .panel-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .panel-count { font-family: var(--mono); font-size: 12px; color: var(--ink-mute); }
+
+  /* 테이블 */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; padding: 10px 14px; font-size: 11px; font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: .1em; color: var(--ink-mute);
+    border-bottom: 1px solid var(--line); font-weight: 500;
+  }
+  .data-table td {
+    padding: 13px 14px; font-size: 13px; border-bottom: 1px solid var(--line);
+    color: var(--ink-soft); vertical-align: top;
+  }
+  .data-table tr:hover td { background: var(--surface-2); }
+  .data-table td.primary { color: var(--ink); font-weight: 500; }
+  .data-table td.mono { font-family: var(--mono); font-size: 12px; }
+  .badge-check { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: rgba(47,133,90,.2); color: var(--green); font-size: 11px; text-align: center; line-height: 18px; }
+  .badge-x { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,.2); color: var(--ink-mute); font-size: 11px; text-align: center; line-height: 18px; }
+  .content-cell { max-width: 340px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .loading-row td { text-align: center; padding: 32px; color: var(--ink-mute); font-family: var(--mono); }
+  .refresh-btn {
+    background: none; border: 1px solid var(--line); color: var(--ink-soft);
+    font-size: 12px; padding: 6px 14px; border-radius: 4px; cursor: pointer;
+    font-family: var(--mono); transition: all .12s;
+  }
+  .refresh-btn:hover { border-color: var(--ochre); color: var(--ochre); }
+
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .admin-body { padding: 20px; }
+  }
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 로그인 화면 -->
+<div class="admin-login" id="adminLogin">
+  <div class="login-box">
+    <div class="brand">humanaid<span>.</span></div>
+    <p>관리자 대시보드에 접근하려면 관리자 키를 입력하세요.</p>
+    <div class="err" id="loginErr">관리자 키가 올바르지 않습니다.</div>
+    <label>Admin Key</label>
+    <input type="password" id="adminKeyInput" placeholder="관리자 키 입력" />
+    <button class="login-btn" id="adminLoginBtn">접속하기 →</button>
+  </div>
+</div>
+
+<!-- 대시보드 -->
+<div class="admin-wrap" id="adminWrap">
+  <div class="admin-topbar">
+    <div class="brand">humanaid</div>
+    <div class="topbar-right">
+      <a href="index.html" class="home-link">← 사이트로 돌아가기</a>
+      <button class="topbar-logout" id="adminLogout">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <!-- 통계 -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num terra" id="st-users">—</div><div class="lbl">가입자</div></div>
+      <div class="stat-card"><div class="num ochre" id="st-subscribers">—</div><div class="lbl">뉴스레터</div></div>
+      <div class="stat-card"><div class="num" id="st-scraps">—</div><div class="lbl">스크랩</div></div>
+      <div class="stat-card"><div class="num green" id="st-applications">—</div><div class="lbl">멤버십 신청</div></div>
+      <div class="stat-card"><div class="num blue" id="st-events">—</div><div class="lbl">이벤트 신청</div></div>
+      <div class="stat-card"><div class="num" id="st-notes">—</div><div class="lbl">노트 제출</div></div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="admin-tabs">
+      <div class="admin-tab active" data-panel="subscribers">뉴스레터 구독자</div>
+      <div class="admin-tab" data-panel="applications">멤버십 신청</div>
+      <div class="admin-tab" data-panel="events">이벤트 신청</div>
+      <div class="admin-tab" data-panel="notes">노트 제출</div>
+    </div>
+
+    <!-- 구독자 패널 -->
+    <div class="admin-panel active" id="panel-subscribers">
+      <div class="panel-header">
+        <span class="panel-title">뉴스레터 구독자</span>
+        <button class="refresh-btn" data-refresh="subscribers">↻ 새로고침</button>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th>#</th><th>이메일</th><th>마케팅</th><th>빌더</th><th>가입일</th>
+        </tr></thead>
+        <tbody id="tbody-subscribers"><tr class="loading-row"><td colspan="5">데이터 불러오는 중…</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- 멤버십 신청 패널 -->
+    <div class="admin-panel" id="panel-applications">
+      <div class="panel-header">
+        <span class="panel-title">멤버십 신청</span>
+        <button class="refresh-btn" data-refresh="applications">↻ 새로고침</button>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th>#</th><th>이름</th><th>이메일</th><th>분야</th><th>프로젝트</th><th>신청일</th>
+        </tr></thead>
+        <tbody id="tbody-applications"><tr class="loading-row"><td colspan="6">데이터 불러오는 중…</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- 이벤트 신청 패널 -->
+    <div class="admin-panel" id="panel-events">
+      <div class="panel-header">
+        <span class="panel-title">이벤트 신청</span>
+        <button class="refresh-btn" data-refresh="events">↻ 새로고침</button>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th>#</th><th>이벤트</th><th>이름</th><th>이메일</th><th>신청일</th>
+        </tr></thead>
+        <tbody id="tbody-events"><tr class="loading-row"><td colspan="5">데이터 불러오는 중…</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- 노트 제출 패널 -->
+    <div class="admin-panel" id="panel-notes">
+      <div class="panel-header">
+        <span class="panel-title">필드 노트 제출</span>
+        <button class="refresh-btn" data-refresh="notes">↻ 새로고침</button>
+      </div>
+      <table class="data-table">
+        <thead><tr>
+          <th>#</th><th>필자</th><th>지역</th><th>내용</th><th>제출일</th>
+        </tr></thead>
+        <tbody id="tbody-notes"><tr class="loading-row"><td colspan="5">데이터 불러오는 중…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var adminKey = '';
+
+  function fmt(dt) {
+    if (!dt) return '—';
+    return new Date(dt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  }
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function api(path) {
+    const res = await fetch(path, { headers: { 'x-admin-key': adminKey } });
+    if (res.status === 403) { logout(); return null; }
+    return res.json();
+  }
+
+  async function loadStats() {
+    const data = await api('/api/admin/stats');
+    if (!data) return;
+    document.getElementById('st-users').textContent = data.users;
+    document.getElementById('st-subscribers').textContent = data.subscribers;
+    document.getElementById('st-scraps').textContent = data.scraps;
+    document.getElementById('st-applications').textContent = data.applications;
+    document.getElementById('st-events').textContent = data.events;
+    document.getElementById('st-notes').textContent = data.notes;
+  }
+
+  async function loadSubscribers() {
+    const tbody = document.getElementById('tbody-subscribers');
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="5">불러오는 중…</td></tr>';
+    const data = await api('/api/admin/subscribers');
+    if (!data) return;
+    if (!data.subscribers.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="5">데이터가 없습니다.</td></tr>'; return; }
+    tbody.innerHTML = data.subscribers.map(function(r, i) {
+      return '<tr><td class="mono">' + (i+1) + '</td>'
+        + '<td class="primary">' + esc(r.email) + '</td>'
+        + '<td>' + (r.marketing_agreed ? '<span class="badge-check">✓</span>' : '<span class="badge-x">—</span>') + '</td>'
+        + '<td>' + (r.builder_agreed ? '<span class="badge-check">✓</span>' : '<span class="badge-x">—</span>') + '</td>'
+        + '<td class="mono">' + fmt(r.created_at) + '</td></tr>';
+    }).join('');
+  }
+
+  async function loadApplications() {
+    const tbody = document.getElementById('tbody-applications');
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="6">불러오는 중…</td></tr>';
+    const data = await api('/api/admin/applications');
+    if (!data) return;
+    if (!data.applications.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="6">데이터가 없습니다.</td></tr>'; return; }
+    tbody.innerHTML = data.applications.map(function(r, i) {
+      return '<tr><td class="mono">' + (i+1) + '</td>'
+        + '<td class="primary">' + esc(r.name) + '</td>'
+        + '<td>' + esc(r.email) + '</td>'
+        + '<td>' + esc(r.field) + '</td>'
+        + '<td class="content-cell">' + esc(r.project) + '</td>'
+        + '<td class="mono">' + fmt(r.created_at) + '</td></tr>';
+    }).join('');
+  }
+
+  async function loadEvents() {
+    const tbody = document.getElementById('tbody-events');
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="5">불러오는 중…</td></tr>';
+    const data = await api('/api/admin/events');
+    if (!data) return;
+    if (!data.events.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="5">데이터가 없습니다.</td></tr>'; return; }
+    tbody.innerHTML = data.events.map(function(r, i) {
+      return '<tr><td class="mono">' + (i+1) + '</td>'
+        + '<td class="primary">' + esc(r.event_name) + '</td>'
+        + '<td>' + esc(r.name) + '</td>'
+        + '<td>' + esc(r.email) + '</td>'
+        + '<td class="mono">' + fmt(r.created_at) + '</td></tr>';
+    }).join('');
+  }
+
+  async function loadNotes() {
+    const tbody = document.getElementById('tbody-notes');
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="5">불러오는 중…</td></tr>';
+    const data = await api('/api/admin/notes');
+    if (!data) return;
+    if (!data.notes.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="5">데이터가 없습니다.</td></tr>'; return; }
+    tbody.innerHTML = data.notes.map(function(r, i) {
+      return '<tr><td class="mono">' + (i+1) + '</td>'
+        + '<td class="primary">' + esc(r.author_name) + '</td>'
+        + '<td>' + esc(r.location) + '</td>'
+        + '<td class="content-cell">' + esc(r.content) + '</td>'
+        + '<td class="mono">' + fmt(r.created_at) + '</td></tr>';
+    }).join('');
+  }
+
+  var loaders = { subscribers: loadSubscribers, applications: loadApplications, events: loadEvents, notes: loadNotes };
+
+  function showDashboard() {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminWrap').style.display = 'block';
+    loadStats();
+    loadSubscribers();
+  }
+
+  function logout() {
+    adminKey = '';
+    sessionStorage.removeItem('ha-admin-key');
+    document.getElementById('adminLogin').style.display = 'flex';
+    document.getElementById('adminWrap').style.display = 'none';
+  }
+
+  document.getElementById('adminLoginBtn').addEventListener('click', async function () {
+    const key = document.getElementById('adminKeyInput').value.trim();
+    if (!key) return;
+    adminKey = key;
+    const data = await api('/api/admin/stats');
+    if (!data) {
+      document.getElementById('loginErr').style.display = 'block';
+      adminKey = '';
+      return;
+    }
+    sessionStorage.setItem('ha-admin-key', key);
+    document.getElementById('loginErr').style.display = 'none';
+    showDashboard();
+  });
+
+  document.getElementById('adminKeyInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.getElementById('adminLoginBtn').click();
+  });
+
+  document.getElementById('adminLogout').addEventListener('click', logout);
+
+  document.querySelectorAll('.admin-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.admin-tab').forEach(function (t) { t.classList.remove('active'); });
+      document.querySelectorAll('.admin-panel').forEach(function (p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      var panelId = 'panel-' + tab.dataset.panel;
+      document.getElementById(panelId).classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.refresh-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.dataset.refresh;
+      if (loaders[key]) loaders[key]();
+    });
+  });
+
+  var saved = sessionStorage.getItem('ha-admin-key');
+  if (saved) { adminKey = saved; showDashboard(); }
+})();
+</script>
+</body>
+</html>

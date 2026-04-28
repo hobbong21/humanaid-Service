@@ -33,3 +33,5 @@
 | 2026-04-28 | 하네스 초기 구성 (Supervisor 패턴) | 전체 | humanaid 프로젝트 자율 업데이트 체계 구축 |
 | 2026-04-28 | 다크모드 토글 구현 — interactions.js + localStorage | frontend | 오케스트레이터 큐 #3 자율 실행 |
 | 2026-04-28 | 마이페이지 구현 — mypage.html + auth.js 마이페이지 링크 | frontend | 오케스트레이터 큐 #2 자율 실행 |
+| 2026-04-28 | 검색 기능 구현 — /api/search + 헤더 검색 UI (드롭다운) | frontend+backend | 오케스트레이터 큐 #1 자율 실행 |
+| 2026-04-28 | 관리자 대시보드 — admin.html + /api/admin/* (5개 엔드포인트) | backend+frontend | 오케스트레이터 큐 #4 자율 실행 |

@@ -292,6 +292,114 @@ app.post('/api/note-submit', async (req, res) => {
   }
 });
 
+/* ─── ADMIN ─── */
+
+const ADMIN_KEY = process.env.ADMIN_KEY || 'humanaid-admin-2026';
+
+function requireAdmin(req, res, next) {
+  const key = req.headers['x-admin-key'] || req.query.key;
+  if (key !== ADMIN_KEY) return res.status(403).json({ error: '관리자 권한이 없습니다.' });
+  next();
+}
+
+app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+  try {
+    const [users, subscribers, scraps, applications, events, notes] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM users'),
+      pool.query('SELECT COUNT(*) FROM newsletter_subscribers'),
+      pool.query('SELECT COUNT(*) FROM scraps'),
+      pool.query('SELECT COUNT(*) FROM applications'),
+      pool.query('SELECT COUNT(*) FROM event_registrations'),
+      pool.query('SELECT COUNT(*) FROM note_submissions'),
+    ]);
+    res.json({
+      users: parseInt(users.rows[0].count),
+      subscribers: parseInt(subscribers.rows[0].count),
+      scraps: parseInt(scraps.rows[0].count),
+      applications: parseInt(applications.rows[0].count),
+      events: parseInt(events.rows[0].count),
+      notes: parseInt(notes.rows[0].count),
+    });
+  } catch (err) {
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+app.get('/api/admin/subscribers', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, email, marketing_agreed, builder_agreed, created_at FROM newsletter_subscribers ORDER BY created_at DESC LIMIT 100');
+    res.json({ subscribers: result.rows });
+  } catch (err) { res.status(500).json({ error: '서버 오류' }); }
+});
+
+app.get('/api/admin/applications', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, name, email, field, project, created_at FROM applications ORDER BY created_at DESC LIMIT 100');
+    res.json({ applications: result.rows });
+  } catch (err) { res.status(500).json({ error: '서버 오류' }); }
+});
+
+app.get('/api/admin/events', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, event_name, name, email, created_at FROM event_registrations ORDER BY created_at DESC LIMIT 100');
+    res.json({ events: result.rows });
+  } catch (err) { res.status(500).json({ error: '서버 오류' }); }
+});
+
+app.get('/api/admin/notes', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, author_name, location, content, created_at FROM note_submissions ORDER BY created_at DESC LIMIT 100');
+    res.json({ notes: result.rows });
+  } catch (err) { res.status(500).json({ error: '서버 오류' }); }
+});
+
+/* ─── SEARCH ─── */
+
+const ARTICLES = [
+  { key: 'ar-1', type: 'article', title: 'AI 모델 추론 비용 분석: GPU 시간이 사라지는 30%', category: 'AI 인프라', author: '심윤경', summary: '국내 5개 AI 스타트업의 GPU 사용량 데이터 4개월치를 분석했다. 추론 요청부터 응답까지의 평균 거리는 1.6초.', min: 7, page: 'index.html' },
+  { key: 'ar-2', type: 'article', title: '휴머노이드 로봇의 두 번째 겨울, 시민 로봇 1년 보고서', category: '로보틱스', author: '박하늘', summary: '피규어AI와 옵티머스가 가정에 들어온 지 1년. 보스턴에서 4년째 활동 중인 연구자가 정리한 일반 가정 베타 테스트의 1년.', min: 12, page: 'index.html' },
+  { key: 'ar-3', type: 'article', title: '실리콘밸리에서 만난 한국인 AI 엔지니어 12인의 기록', category: 'AI', author: '정도훈', summary: '팰로앨토 OpenAI 본사 인근에서 한 달, 시니어 리서처·MLOps·인프라 엔지니어 12인의 일과를 따라갔다.', min: 9, page: 'index.html' },
+  { key: 'ar-4', type: 'article', title: 'AI 모델 평가 지표 다시 짚기: MMLU, HumanEval, MMMU의 의미', category: 'AI 평가', author: '민가람', summary: '주요 LLM 벤치마크가 매달 발표되는 새 모델 발표문의 의미를 다시 짚어본다.', min: 10, page: 'index.html' },
+  { key: 'ar-5', type: 'article', title: 'ChatGPT 출시 3년, AI는 우리 일상을 어떻게 바꿨나', category: '트렌드', author: '유리아', summary: '일상 활용도 92%, 그러나 깊이 있는 활용은 17%. 도쿄·서울·교토를 다녀온 실사용 보고.', min: 8, page: 'index.html' },
+  { key: 'ar-6', type: 'article', title: '테슬라 옵티머스 v3 출시, 한국 제조업의 대응 매뉴얼', category: '로보틱스', author: '이주연', summary: '자동차·전자·식품 3개 업종의 72시간 대응 매뉴얼을 처음부터 끝까지 풀어본다.', min: 6, page: 'index.html' },
+  { key: 'top-1', type: 'article', title: 'AI 코딩 어시스턴트의 진짜 생산성, 한국 개발자 1,200명에게 물었다', category: 'AI', author: 'humanaid 데스크', summary: '한국 개발자 1,200명 대상 생산성 조사 리포트.', min: 9, page: 'index.html' },
+  { key: 'top-2', type: 'article', title: '디지털 휴먼이라는 이름, 죽음 이후의 정체성을 추적한 6개월', category: '디지털 휴먼', author: 'humanaid 데스크', summary: '죽음 이후의 정체성을 디지털로 보존하는 6개월간의 추적 보고.', min: 11, page: 'index.html' },
+  { key: 'top-3', type: 'article', title: '한국 반도체 산업의 다음 10년, HBM 이후 무엇이 달라져야 하나', category: '반도체', author: '심윤경', summary: 'HBM 이후 한국 반도체 산업의 방향성을 짚는다.', min: 7, page: 'index.html' },
+  { key: 'top-4', type: 'article', title: 'AI로 본 글로벌 GPU 공급망의 보틀넥 지도', category: '데이터', author: 'humanaid 데스크', summary: 'AI 반도체 공급망의 보틀넥을 데이터로 시각화한 분석.', min: 6, page: 'index.html' },
+  { key: 'col-1', type: 'collection', title: 'AI 엔지니어 필독서 14권', category: '컬렉션', author: '정도훈', summary: 'AI 엔지니어가 반드시 읽어야 할 14권의 책 큐레이션.', min: null, page: 'index.html' },
+  { key: 'col-2', type: 'collection', title: '빅테크 인사이드 르포 모아보기', category: '컬렉션', author: '민가람', summary: '구글·메타·애플·MS 내부를 들여다본 르포 시리즈.', min: null, page: 'index.html' },
+  { key: 'col-3', type: 'collection', title: '2026 상반기 LLM 핵심 이슈', category: '컬렉션', author: '심윤경', summary: '2026년 상반기를 이끈 대형 언어 모델 주요 이슈 정리.', min: null, page: 'index.html' },
+  { key: 'note-1', type: 'note', title: '젠슨 황, 로보틱스 올인 선언', category: '로보틱스', author: '박하늘', summary: 'NVIDIA GTC 현장. 젠슨 황이 2026년 올해 로보틱스 올인을 선언했다.', min: null, page: 'field-notes.html' },
+  { key: 'note-2', type: 'note', title: '앤트로픽 내부 문건 유출', category: 'AI', author: '정도훈', summary: '앤트로픽 내부 안전 평가 문건 일부 유출. Claude 4 모델 자율성 평가 기준 포함.', min: null, page: 'field-notes.html' },
+  { key: 'note-3', type: 'note', title: 'SK하이닉스 HBM4 샘플 출하', category: '반도체', author: '심윤경', summary: 'SK하이닉스 HBM4 정식 샘플 출하 시작.', min: null, page: 'field-notes.html' },
+  { key: 'bh-1', type: 'builder', title: '스타트업 창업자를 위한 AI 법률 세미나', category: '이벤트', author: 'humanaid 데스크', summary: 'AI 스타트업 창업자를 위한 법률 실무 세미나.', min: null, page: 'builder-hub.html' },
+  { key: 'bh-2', type: 'builder', title: 'humanaid 빌더 멤버십', category: '멤버십', author: 'humanaid 데스크', summary: 'humanaid 빌더 커뮤니티 멤버십 가입 안내.', min: null, page: 'builder-hub.html' },
+];
+
+const TYPE_KR = { article: '아티클', collection: '컬렉션', note: '노트', builder: '빌더' };
+
+app.get('/api/search', (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 1) return res.json({ results: [] });
+  const lower = q.toLowerCase();
+  const results = ARTICLES.filter(a =>
+    a.title.toLowerCase().includes(lower) ||
+    (a.category && a.category.toLowerCase().includes(lower)) ||
+    (a.author && a.author.toLowerCase().includes(lower)) ||
+    (a.summary && a.summary.toLowerCase().includes(lower))
+  ).slice(0, 7).map(a => ({
+    key: a.key,
+    type: a.type,
+    typeKr: TYPE_KR[a.type] || a.type,
+    title: a.title,
+    category: a.category,
+    author: a.author,
+    min: a.min,
+    page: a.page
+  }));
+  res.json({ results });
+});
+
 /* ─── STATIC FILES ─── */
 app.use(express.static(path.join(__dirname)));
 

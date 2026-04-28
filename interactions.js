@@ -558,6 +558,187 @@
   }
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     검색
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  function initSearch() {
+    const searchStyle = document.createElement('style');
+    searchStyle.textContent = `
+      #ha-search-wrap {
+        position: relative; display: flex; align-items: center; gap: 0;
+      }
+      #ha-search-btn {
+        background: none; border: 1px solid transparent; border-radius: 999px;
+        width: 34px; height: 34px; cursor: pointer; font-size: 15px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--ink-soft); transition: all .15s; flex-shrink: 0;
+      }
+      #ha-search-btn:hover { border-color: var(--line-strong); color: var(--ink); background: var(--surface-2); }
+      #ha-search-input {
+        width: 0; overflow: hidden; border: none; outline: none;
+        font-family: 'Noto Sans KR', sans-serif; font-size: 14px;
+        background: transparent; color: var(--ink); padding: 0;
+        transition: width .25s ease, padding .25s ease;
+      }
+      #ha-search-wrap.open #ha-search-input {
+        width: 200px; padding: 0 8px;
+        border-bottom: 1.5px solid var(--ink);
+      }
+      #ha-search-dropdown {
+        display: none; position: absolute; top: calc(100% + 10px); right: 0;
+        width: 380px; background: var(--surface); border: 1px solid var(--line-strong);
+        border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,.12);
+        z-index: 9999; overflow: hidden;
+      }
+      #ha-search-dropdown.open { display: block; }
+      .ha-sr-header {
+        padding: 12px 18px 8px; font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+        letter-spacing: .1em; color: var(--ink-mute); text-transform: uppercase;
+        border-bottom: 1px solid var(--line);
+      }
+      .ha-sr-item {
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 14px 18px; cursor: pointer; transition: background .1s;
+        border-bottom: 1px solid var(--line); text-decoration: none; color: inherit;
+      }
+      .ha-sr-item:last-child { border-bottom: 0; }
+      .ha-sr-item:hover { background: var(--surface-2); }
+      .ha-sr-badge {
+        flex-shrink: 0; margin-top: 3px; font-family: 'IBM Plex Mono', monospace;
+        font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+        padding: 2px 7px; border-radius: 999px;
+        border: 1px solid var(--line-strong); color: var(--ink-mute);
+        white-space: nowrap;
+      }
+      .ha-sr-badge.article { background: #FFF0EC; color: #B8412A; border-color: #F5C4B8; }
+      .ha-sr-badge.note    { background: #F0F4FF; color: #3B5BDB; border-color: #C5D0F5; }
+      .ha-sr-badge.collection { background: #F4FFF0; color: #2F855A; border-color: #B2DFBC; }
+      .ha-sr-badge.builder { background: #FFFBF0; color: #C98A2B; border-color: #E8D4A0; }
+      .ha-sr-body { flex: 1; min-width: 0; }
+      .ha-sr-title {
+        font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .ha-sr-meta {
+        font-size: 12px; color: var(--ink-mute); margin-top: 2px;
+        font-family: 'IBM Plex Mono', monospace;
+      }
+      .ha-sr-empty {
+        padding: 24px 18px; text-align: center; color: var(--ink-mute); font-size: 13.5px;
+      }
+      .ha-sr-footer {
+        padding: 10px 18px; font-size: 12px; color: var(--ink-mute);
+        border-top: 1px solid var(--line); font-family: 'IBM Plex Mono', monospace;
+        text-align: right;
+      }
+      body.dark-mode #ha-search-dropdown {
+        background: var(--surface); border-color: var(--line-strong);
+        box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      }
+      body.dark-mode #ha-search-wrap.open #ha-search-input { border-bottom-color: var(--ink); }
+    `;
+    document.head.appendChild(searchStyle);
+
+    const headerRight = document.querySelector('.header-right');
+    if (!headerRight) return;
+
+    const wrap = document.createElement('div');
+    wrap.id = 'ha-search-wrap';
+
+    const input = document.createElement('input');
+    input.id = 'ha-search-input';
+    input.type = 'text';
+    input.placeholder = '제목, 작가, 카테고리 검색…';
+    input.setAttribute('autocomplete', 'off');
+
+    const btn = document.createElement('button');
+    btn.id = 'ha-search-btn';
+    btn.title = '검색';
+    btn.textContent = '⌕';
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'ha-search-dropdown';
+
+    wrap.appendChild(input);
+    wrap.appendChild(btn);
+    wrap.appendChild(dropdown);
+    headerRight.prepend(wrap);
+
+    let debounce = null;
+    let isOpen = false;
+
+    function openSearch() {
+      wrap.classList.add('open');
+      isOpen = true;
+      setTimeout(function () { input.focus(); }, 50);
+    }
+
+    function closeSearch() {
+      wrap.classList.remove('open');
+      dropdown.classList.remove('open');
+      input.value = '';
+      isOpen = false;
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (isOpen) { closeSearch(); } else { openSearch(); }
+    });
+
+    input.addEventListener('input', function () {
+      clearTimeout(debounce);
+      const q = input.value.trim();
+      if (q.length < 1) { dropdown.classList.remove('open'); return; }
+      debounce = setTimeout(function () { doSearch(q); }, 280);
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeSearch();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!wrap.contains(e.target)) closeSearch();
+    });
+
+    async function doSearch(q) {
+      try {
+        const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+        const data = await res.json();
+        renderResults(data.results || [], q);
+      } catch (e) {
+        dropdown.innerHTML = '<div class="ha-sr-empty">검색 중 오류가 발생했습니다.</div>';
+        dropdown.classList.add('open');
+      }
+    }
+
+    function highlight(text, q) {
+      if (!q) return text;
+      const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return text.replace(re, '<mark style="background:rgba(184,65,42,.15);color:inherit;border-radius:2px;">$1</mark>');
+    }
+
+    function renderResults(results, q) {
+      if (results.length === 0) {
+        dropdown.innerHTML = '<div class="ha-sr-empty">\'<strong>' + q + '</strong>\'에 대한 검색 결과가 없습니다.</div>';
+        dropdown.classList.add('open');
+        return;
+      }
+      let html = '<div class="ha-sr-header">검색 결과 ' + results.length + '건</div>';
+      results.forEach(function (r) {
+        const meta = [r.category, r.author, r.min ? r.min + '분' : null].filter(Boolean).join(' · ');
+        html += '<a class="ha-sr-item" href="' + r.page + '">'
+          + '<span class="ha-sr-badge ' + r.type + '">' + r.typeKr + '</span>'
+          + '<div class="ha-sr-body">'
+          + '<div class="ha-sr-title">' + highlight(r.title, q) + '</div>'
+          + '<div class="ha-sr-meta">' + meta + '</div>'
+          + '</div></a>';
+      });
+      html += '<div class="ha-sr-footer">Enter 또는 클릭으로 이동</div>';
+      dropdown.innerHTML = html;
+      dropdown.classList.add('open');
+    }
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      다크모드 토글
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   function initDarkMode() {
@@ -622,6 +803,7 @@
   }
 
   function init() {
+    initSearch();
     initDarkMode();
     initCategoryFilter();
     initNewsletter();
