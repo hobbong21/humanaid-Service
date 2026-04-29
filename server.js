@@ -97,6 +97,22 @@ async function initDB() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id SERIAL PRIMARY KEY,
+      author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      title VARCHAR(500) NOT NULL,
+      body TEXT NOT NULL DEFAULT '',
+      category VARCHAR(100) DEFAULT '자유',
+      status VARCHAR(20) DEFAULT 'draft',
+      view_count INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author_id)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_posts_created ON posts(created_at DESC)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_scraps_user_id ON scraps(user_id)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_scraps_item_key ON scraps(item_key)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_likes_item_key ON likes(item_key)`);
@@ -176,6 +192,24 @@ app.post('/api/auth/change-password', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('비밀번호 변경 오류:', err);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+app.post('/api/auth/update-profile', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: '로그인이 필요합니다.' });
+  const { nickname } = req.body;
+  if (!nickname || !nickname.trim()) return res.status(400).json({ error: '닉네임을 입력해주세요.' });
+  if (nickname.trim().length > 20) return res.status(400).json({ error: '닉네임은 20자 이하로 입력해주세요.' });
+  try {
+    const result = await pool.query(
+      'UPDATE users SET nickname=$1 WHERE id=$2 RETURNING id, email, nickname',
+      [nickname.trim(), req.session.userId]
+    );
+    req.session.userNickname = result.rows[0].nickname;
+    res.json({ success: true, user: result.rows[0] });
+  } catch (err) {
+    console.error('프로필 업데이트 오류:', err);
     res.status(500).json({ error: '서버 오류가 발생했습니다.' });
   }
 });
@@ -263,6 +297,16 @@ app.post('/api/like', async (req, res) => {
     }
     await pool.query('INSERT INTO likes (user_id, item_key) VALUES ($1,$2)', [req.session.userId, itemKey]);
     res.json({ success: true, liked: true });
+  } catch (err) {
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+app.get('/api/likes/count', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: '로그인이 필요합니다.' });
+  try {
+    const result = await pool.query('SELECT COUNT(*) FROM likes WHERE user_id=$1', [req.session.userId]);
+    res.json({ count: parseInt(result.rows[0].count) });
   } catch (err) {
     res.status(500).json({ error: '서버 오류' });
   }
@@ -376,6 +420,143 @@ app.get('/api/admin/notes', requireAdmin, async (req, res) => {
     const result = await pool.query('SELECT id, author_name, location, content, created_at FROM note_submissions ORDER BY created_at DESC LIMIT 100');
     res.json({ notes: result.rows });
   } catch (err) { res.status(500).json({ error: '서버 오류' }); }
+});
+
+/* ─── POSTS CRUD ─── */
+
+const POST_CATS = ['자유', 'AI', '반도체', '로보틱스', '바이오테크', '스타트업', '개발자', '트렌드', '사이버보안', '기타'];
+
+app.get('/api/posts', async (req, res) => {
+  const { status = 'published', page = 1, limit = 12, category, author_id } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  try {
+    let where = [];
+    let params = [];
+    let i = 1;
+    if (status !== 'all') { where.push(`p.status = $${i++}`); params.push(status); }
+    if (category && category !== '전체') { where.push(`p.category = $${i++}`); params.push(category); }
+    if (author_id) { where.push(`p.author_id = $${i++}`); params.push(parseInt(author_id)); }
+    const whereClause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+    const countResult = await pool.query(`SELECT COUNT(*) FROM posts p ${whereClause}`, params);
+    const total = parseInt(countResult.rows[0].count);
+    params.push(parseInt(limit), offset);
+    const result = await pool.query(
+      `SELECT p.id, p.title, LEFT(p.body, 200) AS excerpt, p.category, p.status, p.view_count, p.created_at, p.updated_at,
+              u.nickname AS author_name, u.id AS author_id
+       FROM posts p JOIN users u ON p.author_id = u.id
+       ${whereClause} ORDER BY p.created_at DESC LIMIT $${i++} OFFSET $${i++}`,
+      params
+    );
+    res.json({ posts: result.rows, total, page: parseInt(page), limit: parseInt(limit) });
+  } catch (err) {
+    console.error('posts list error:', err);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+app.get('/api/posts/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (!id) return res.status(400).json({ error: '잘못된 요청' });
+  try {
+    await pool.query('UPDATE posts SET view_count = view_count + 1 WHERE id = $1', [id]);
+    const result = await pool.query(
+      `SELECT p.*, u.nickname AS author_name, u.id AS author_id
+       FROM posts p JOIN users u ON p.author_id = u.id
+       WHERE p.id = $1`, [id]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: '글을 찾을 수 없습니다.' });
+    const post = result.rows[0];
+    if (post.status === 'draft' && req.session.userId !== post.author_id) {
+      return res.status(403).json({ error: '접근 권한이 없습니다.' });
+    }
+    res.json({ post });
+  } catch (err) {
+    console.error('post get error:', err);
+    res.status(500).json({ error: '서버 오류' });
+  }
+});
+
+app.post('/api/posts', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: '로그인이 필요합니다.', needLogin: true });
+  const { title, body, category = '자유', status = 'draft' } = req.body;
+  if (!title || !title.trim()) return res.status(400).json({ error: '제목을 입력해주세요.' });
+  if (!body || !body.trim()) return res.status(400).json({ error: '본문을 입력해주세요.' });
+  if (!['draft', 'published'].includes(status)) return res.status(400).json({ error: '잘못된 상태값' });
+  try {
+    const result = await pool.query(
+      'INSERT INTO posts (author_id, title, body, category, status) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+      [req.session.userId, title.trim(), body.trim(), category, status]
+    );
+    res.json({ success: true, post: result.rows[0] });
+  } catch (err) {
+    console.error('post create error:', err);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+app.put('/api/posts/:id', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: '로그인이 필요합니다.', needLogin: true });
+  const id = parseInt(req.params.id);
+  if (!id) return res.status(400).json({ error: '잘못된 요청' });
+  try {
+    const existing = await pool.query('SELECT author_id FROM posts WHERE id=$1', [id]);
+    if (!existing.rows.length) return res.status(404).json({ error: '글을 찾을 수 없습니다.' });
+    const isAdmin = req.headers['x-admin-key'] === (process.env.ADMIN_KEY || 'humanaid-admin-2026');
+    if (existing.rows[0].author_id !== req.session.userId && !isAdmin) {
+      return res.status(403).json({ error: '수정 권한이 없습니다.' });
+    }
+    const { title, body, category, status } = req.body;
+    const updates = [];
+    const params = [];
+    let i = 1;
+    if (title !== undefined) { updates.push(`title=$${i++}`); params.push(title.trim()); }
+    if (body !== undefined) { updates.push(`body=$${i++}`); params.push(body.trim()); }
+    if (category !== undefined) { updates.push(`category=$${i++}`); params.push(category); }
+    if (status !== undefined) { updates.push(`status=$${i++}`); params.push(status); }
+    updates.push(`updated_at=NOW()`);
+    params.push(id);
+    const result = await pool.query(
+      `UPDATE posts SET ${updates.join(',')} WHERE id=$${i} RETURNING *`,
+      params
+    );
+    res.json({ success: true, post: result.rows[0] });
+  } catch (err) {
+    console.error('post update error:', err);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+app.delete('/api/posts/:id', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: '로그인이 필요합니다.', needLogin: true });
+  const id = parseInt(req.params.id);
+  if (!id) return res.status(400).json({ error: '잘못된 요청' });
+  try {
+    const existing = await pool.query('SELECT author_id FROM posts WHERE id=$1', [id]);
+    if (!existing.rows.length) return res.status(404).json({ error: '글을 찾을 수 없습니다.' });
+    const isAdmin = req.headers['x-admin-key'] === (process.env.ADMIN_KEY || 'humanaid-admin-2026');
+    if (existing.rows[0].author_id !== req.session.userId && !isAdmin) {
+      return res.status(403).json({ error: '삭제 권한이 없습니다.' });
+    }
+    await pool.query('DELETE FROM posts WHERE id=$1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('post delete error:', err);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+app.get('/api/posts/my/list', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: '로그인이 필요합니다.' });
+  try {
+    const result = await pool.query(
+      `SELECT id, title, category, status, view_count, created_at, updated_at
+       FROM posts WHERE author_id=$1 ORDER BY updated_at DESC`,
+      [req.session.userId]
+    );
+    res.json({ posts: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: '서버 오류' });
+  }
 });
 
 /* ─── SEARCH ─── */
